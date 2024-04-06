@@ -1,0 +1,12 @@
+:root {
+    --tblr-body-bg: #f8f9fa
+}
+
+.navbar-vertical.navbar-expand-lg {
+    width: 18rem;
+    border-right: 1px solid var(--tblr-light-darken);
+}
+
+.page-wrapper {
+    margin-left: 18rem;
+}

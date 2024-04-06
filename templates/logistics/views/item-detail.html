@@ -1,0 +1,12 @@
+{{ define "pretitle" }}Logistics{{ end }}
+{{ define "title" }}Item {{ .Item.ID }}{{ end }}
+
+{{ define "control" }}
+<div class="btn-list">
+    <input class="btn btn-primary d-none d-sm-inline-block" type="submit" form="form" value="Submit">
+</div>
+{{ end }}
+
+{{ define "content" }}
+{{ template "item-form" . }}
+{{ end }}

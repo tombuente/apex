@@ -1,0 +1,112 @@
+{{ define "pretitle" }}Logistics{{ end }}
+{{ define "title" }}Items{{ end }}
+
+{{ define "control" }}
+<div class="btn-list">
+	<button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#item-filter">
+		Filter
+	</button>
+	<a href="/logistics/items/new" class="btn btn-primary d-none d-sm-inline-block">
+		<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2"
+			stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+			<path stroke="none" d="M0 0h24v24H0z" fill="none" />
+			<line x1="12" y1="5" x2="12" y2="19" />
+			<line x1="5" y1="12" x2="19" y2="12" />
+		</svg>
+		Create new item
+	</a>
+</div>
+{{ end }}
+
+{{ define "content" }}
+<div id="item-filter"class="modal modal-blur fade" tabindex="-1">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Item Filter</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<form action="/logistics/items">
+				<div class="modal-body">
+					<div class="mb-3">
+						<label class="form-label">Name</label>
+						<input class="form-control" type="text" name="name">
+					</div>
+
+					<div class="mb-3">
+						<label class="form-label">SKU</label>
+						<input class="form-control" type="text" name="sku">
+					</div>
+
+					<div class="mb-3">
+						<label class="form-label">Category</label>
+						<select class="form-select" name="category_id">
+							<option value="">All</option>
+							<option value="1">None</option>
+						</select>
+					</div>
+
+					<div class="mb-3">
+						<label class="form-label">Gross Price</label>
+						<input class="form-control" type="number" name="gross_price">
+					</div>
+
+					<div class="mb-3">
+						<label class="form-label">Net Price</label>
+						<input class="form-control" type="number" name="net_price">
+					</div>
+				</div>
+				<div class="modal-footer">
+					<a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal">
+						Cancel
+					</a>
+					<a class="btn btn-danger d-none d-sm-inline-block" href="/logistics/items">
+						Reset
+					</a>
+					<input class="btn btn-primary d-none d-sm-inline-block" type="submit" value="Submit">
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<div class="table-responsive">
+	<table class="table table-vcenter">
+		<thead>
+			<tr>
+				<th>ID</th>
+				<th>Name</th>
+				<th>SKU</th>
+				<th>Category ID</th>
+				<th>Gross Price</th>
+				<th>Net Price</th>
+				<th>...</th>
+			</tr>
+		</thead>
+		<tbody>
+			{{ range .Items }}
+			<tr>
+				<td>{{.ID}}</td>
+				<td>{{.Name}}</td>
+				<td>{{.SKU}}</td>
+				<td>{{.CategoryID}}</td>
+				<td>{{.GrossPrice}}</td>
+				<td>{{.NetPrice}}</td>
+				<td>
+					<a href="/logistics/items/{{ .ID }}">
+						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+							stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+							class="icon icon-tabler icons-tabler-outline icon-tabler-edit">
+							<path stroke="none" d="M0 0h24v24H0z" fill="none" />
+							<path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" />
+							<path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415z" />
+							<path d="M16 5l3 3" />
+						</svg>
+					</a>
+				</td>
+			</tr>
+			{{end}}
+		</tbody>
+	</table>
+</div>
+{{ end }}
