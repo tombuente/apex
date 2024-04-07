@@ -1,0 +1,38 @@
+{{ define "address-form" }}
+<form id="address-form" action="{{ .Action }}" method="post">
+    <div class="mb-3">
+        <label class="form-label" required>ZIP</label>
+        <input class="form-control" type="text" name="zip" {{ if .Address }}value="{{ .Address.ZIP }}"{{ end }} required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label" required>City</label>
+        <input class="form-control" type="text" name="city" {{ if .Address }}value="{{ .Address.City }}"{{ end }} required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label" required>Street</label>
+        <input class="form-control" type="text" name="street" {{ if .Address }}value="{{ .Address.Street }}"{{ end }} required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Street Number</label>
+        <input class="form-control" type="text" name="street_number" {{ if .Address }}value="{{ .Address.StreetNumber }}"{{ end }}>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Country</label>
+        <input class="form-control" type="text" name="country" {{ if .Address }}value="{{ .Address.Country }}"{{ end }}>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Longitude</label>
+        <input class="form-control" type="number" name="longitude" {{ if .Address }}value="{{ .Address.Longitude }}"{{ end }}>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Latitude</label>
+        <input class="form-control" type="number" name="latitude" {{ if .Address }}value="{{ .Address.Latitude }}"{{ end }}>
+    </div>
+</form>
+{{ end }}
