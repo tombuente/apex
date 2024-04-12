@@ -1,7 +1,5 @@
 package logistics
 
-const appName = "logistics"
-
 type Item struct {
 	ID         int64  `db:"id" json:"id"`
 	Name       string `db:"name" json:"name"`

@@ -1,4 +1,4 @@
-package xerr
+package xerrors
 
 import (
 	"errors"
@@ -7,6 +7,7 @@ import (
 
 var (
 	ErrInternal = errors.New("internal error")
+	ErrNotFound = errors.New("not found")
 )
 
 func Join(err1 error, err2 error) error {

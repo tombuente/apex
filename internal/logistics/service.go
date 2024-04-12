@@ -4,6 +4,8 @@ import (
 	"context"
 )
 
+const name = "logistics"
+
 type Service struct {
 	db Database
 }

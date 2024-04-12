@@ -25,29 +25,15 @@ func NewUIRouter(service Service) (chi.Router, error) {
 		templates: make(map[string]*template.Template),
 	}
 
-	templs := make(map[string][]string)
-	templs["dashboard"] = []string{"layout", "logistics/views/dashboard"}
-
-	templs["item-list"] = []string{"layout", "logistics/views/item-list"}
-	templs["item-detail"] = []string{"layout", "logistics/views/item-detail", "logistics/components/item-form"}
-	templs["item-create"] = []string{"layout", "logistics/views/item-create", "logistics/components/item-form"}
-
-	templs["address-list"] = []string{"layout", "logistics/views/address-list"}
-	templs["address-detail"] = []string{"layout", "logistics/views/address-detail", "logistics/components/address-form"}
-	templs["address-create"] = []string{"layout", "logistics/views/address-create", "logistics/components/address-form"}
-
-	templs["plant-list"] = []string{"layout", "logistics/views/plant-list"}
-	templs["plant-detail"] = []string{"layout", "logistics/views/plant-detail", "logistics/components/plant-form"}
-	templs["plant-create"] = []string{"layout", "logistics/views/plant-create", "logistics/components/plant-form"}
-
 	var err error
-	ui.templates, err = templates.Load(templs)
+	ui.templates, err = templates.Load("logistics")
 	if err != nil {
 		return nil, err
 	}
 
 	r := chi.NewRouter()
 	r.Get("/", ui.indexView)
+
 	r.Route("/items", func(r chi.Router) {
 		r.Get("/{id}", ui.itemDetailView)
 		r.Post("/{id}", ui.itemUpdate)
@@ -55,19 +41,21 @@ func NewUIRouter(service Service) (chi.Router, error) {
 		r.Post("/", ui.itemCreate)
 		r.Get("/new", ui.itemCreateView)
 	})
-	r.Route("/addresses", func(r chi.Router) {
-		r.Get("/{id}", ui.addressDetailView)
-		r.Post("/{id}", ui.addressUpdate)
-		r.Get("/", ui.addressListView)
-		r.Post("/", ui.addressCreate)
-		r.Get("/new", ui.addressCreateView)
-	})
+
 	r.Route("/plants", func(r chi.Router) {
 		r.Get("/{id}", ui.plantDetailView)
 		r.Post("/{id}", ui.plantUpdate)
 		r.Get("/", ui.plantListView)
 		r.Post("/", ui.plantCreate)
 		r.Get("/new", ui.plantCreateView)
+	})
+
+	r.Route("/addresses", func(r chi.Router) {
+		r.Get("/{id}", ui.addressDetailView)
+		r.Post("/{id}", ui.addressUpdate)
+		r.Get("/", ui.addressListView)
+		r.Post("/", ui.addressCreate)
+		r.Get("/new", ui.addressCreateView)
 	})
 
 	return r, nil
@@ -395,12 +383,20 @@ func (ui UI) plantDetailView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	addresses, _, err := ui.service.addresses(r.Context(), AddressFilter{})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	ctx := struct {
-		Action string
-		Plant  *Plant
+		PlantFormAction string
+		Plant           *Plant
+		Addresses       []Address
 	}{
-		Action: fmt.Sprintf("/logistics/plants/%v", id),
-		Plant:  &plant,
+		PlantFormAction: fmt.Sprintf("/logistics/plants/%v", id),
+		Plant:           &plant,
+		Addresses:       addresses,
 	}
 
 	err = ui.templates["plant-detail"].Execute(w, ctx)
@@ -410,15 +406,23 @@ func (ui UI) plantDetailView(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ui UI) plantCreateView(w http.ResponseWriter, r *http.Request) {
-	ctx := struct {
-		Action string
-		Plant  *Address
-	}{
-		Action: "/logistics/plants",
-		Plant:  nil,
+	addresses, _, err := ui.service.addresses(r.Context(), AddressFilter{})
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
 	}
 
-	err := ui.templates["plant-create"].Execute(w, ctx)
+	ctx := struct {
+		PlantFormAction string
+		Plant           *Address
+		Addresses       []Address
+	}{
+		PlantFormAction: "/logistics/plants",
+		Plant:           nil,
+		Addresses:       addresses,
+	}
+
+	err = ui.templates["plant-create"].Execute(w, ctx)
 	if err != nil {
 		slog.Error("Unable to execute template", "error", err)
 	}

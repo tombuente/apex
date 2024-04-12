@@ -10,3 +10,7 @@
 .page-wrapper {
     margin-left: 18rem;
 }
+
+.dropdown-menu .dropdown-menu-column {
+    transition: all 2s;
+}

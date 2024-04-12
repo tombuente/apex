@@ -2,17 +2,24 @@ package logistics
 
 import (
 	"context"
+	_ "embed"
 	"fmt"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/jmoiron/sqlx"
-	"github.com/tombuente/apex/internal/xerr"
+	"github.com/tombuente/apex/internal/xerrors"
 )
 
+//go:embed schema.sql
+var Schema string
+
+//go:embed fixture.sql
+var Fixture string
+
 var (
-	itemsTable     = fmt.Sprintf("%v_items", appName)
-	addressesTable = fmt.Sprintf("%v_addresses", appName)
-	plantsTable    = fmt.Sprintf("%v_plants", appName)
+	itemsTable     = fmt.Sprintf("%v_items", name)
+	addressesTable = fmt.Sprintf("%v_addresses", name)
+	plantsTable    = fmt.Sprintf("%v_plants", name)
 )
 
 type Database struct {
@@ -67,12 +74,12 @@ func (db Database) items(ctx context.Context, filter ItemFilter) ([]Item, bool, 
 
 	query, args, err := builder.ToSql()
 	if err != nil {
-		return []Item{}, false, xerr.Join(xerr.ErrInternal, err)
+		return []Item{}, false, xerrors.Join(xerrors.ErrInternal, err)
 	}
 
 	rows, err := db.db.QueryxContext(ctx, query, args...)
 	if err != nil {
-		return []Item{}, false, xerr.Join(xerr.ErrInternal, err)
+		return []Item{}, false, xerrors.Join(xerrors.ErrInternal, err)
 	}
 	defer rows.Close()
 
@@ -81,7 +88,7 @@ func (db Database) items(ctx context.Context, filter ItemFilter) ([]Item, bool, 
 		var i Item
 		err := rows.StructScan(&i)
 		if err != nil {
-			return []Item{}, false, xerr.Join(xerr.ErrInternal, err)
+			return []Item{}, false, xerrors.Join(xerrors.ErrInternal, err)
 		}
 
 		items = append(items, i)
@@ -101,7 +108,7 @@ func (db Database) createItem(ctx context.Context, params ItemParams) (Item, err
 		Suffix("RETURNING *").
 		ToSql()
 	if err != nil {
-		return Item{}, xerr.Join(xerr.ErrInternal, err)
+		return Item{}, xerrors.Join(xerrors.ErrInternal, err)
 	}
 
 	row := db.db.QueryRowxContext(ctx, query, args...)
@@ -109,7 +116,7 @@ func (db Database) createItem(ctx context.Context, params ItemParams) (Item, err
 	var i Item
 	err = row.StructScan(&i)
 	if err != nil {
-		return Item{}, xerr.Join(xerr.ErrInternal, err)
+		return Item{}, xerrors.Join(xerrors.ErrInternal, err)
 	}
 
 	return i, nil
@@ -127,7 +134,7 @@ func (db Database) updateItem(ctx context.Context, id int64, params ItemParams) 
 		ToSql()
 
 	if err != nil {
-		return Item{}, xerr.Join(xerr.ErrInternal, err)
+		return Item{}, xerrors.Join(xerrors.ErrInternal, err)
 	}
 
 	row := db.db.QueryRowxContext(ctx, query, args...)
@@ -135,7 +142,7 @@ func (db Database) updateItem(ctx context.Context, id int64, params ItemParams) 
 	var i Item
 	err = row.StructScan(&i)
 	if err != nil {
-		return Item{}, xerr.Join(xerr.ErrInternal, err)
+		return Item{}, xerrors.Join(xerrors.ErrInternal, err)
 	}
 
 	return i, nil
@@ -168,12 +175,12 @@ func (db Database) addresses(ctx context.Context, filter AddressFilter) ([]Addre
 
 	query, args, err := builder.ToSql()
 	if err != nil {
-		return []Address{}, false, xerr.Join(xerr.ErrInternal, err)
+		return []Address{}, false, xerrors.Join(xerrors.ErrInternal, err)
 	}
 
 	rows, err := db.db.QueryxContext(ctx, query, args...)
 	if err != nil {
-		return []Address{}, false, xerr.Join(xerr.ErrInternal, err)
+		return []Address{}, false, xerrors.Join(xerrors.ErrInternal, err)
 	}
 	defer rows.Close()
 
@@ -182,7 +189,7 @@ func (db Database) addresses(ctx context.Context, filter AddressFilter) ([]Addre
 		var i Address
 		err := rows.StructScan(&i)
 		if err != nil {
-			return []Address{}, false, xerr.Join(xerr.ErrInternal, err)
+			return []Address{}, false, xerrors.Join(xerrors.ErrInternal, err)
 		}
 
 		addresses = append(addresses, i)
@@ -202,7 +209,7 @@ func (db Database) createAddress(ctx context.Context, params AddressParams) (Add
 		Suffix("RETURNING *").
 		ToSql()
 	if err != nil {
-		return Address{}, xerr.Join(xerr.ErrInternal, err)
+		return Address{}, xerrors.Join(xerrors.ErrInternal, err)
 	}
 
 	row := db.db.QueryRowxContext(ctx, query, args...)
@@ -210,7 +217,7 @@ func (db Database) createAddress(ctx context.Context, params AddressParams) (Add
 	var i Address
 	err = row.StructScan(&i)
 	if err != nil {
-		return Address{}, xerr.Join(xerr.ErrInternal, err)
+		return Address{}, xerrors.Join(xerrors.ErrInternal, err)
 	}
 
 	return i, nil
@@ -230,7 +237,7 @@ func (db Database) updateAddress(ctx context.Context, id int64, params AddressPa
 		ToSql()
 
 	if err != nil {
-		return Address{}, xerr.Join(xerr.ErrInternal, err)
+		return Address{}, xerrors.Join(xerrors.ErrInternal, err)
 	}
 
 	row := db.db.QueryRowxContext(ctx, query, args...)
@@ -238,7 +245,7 @@ func (db Database) updateAddress(ctx context.Context, id int64, params AddressPa
 	var i Address
 	err = row.StructScan(&i)
 	if err != nil {
-		return Address{}, xerr.Join(xerr.ErrInternal, err)
+		return Address{}, xerrors.Join(xerrors.ErrInternal, err)
 	}
 
 	return i, nil
@@ -277,12 +284,12 @@ func (db Database) plants(ctx context.Context, filter PlantFilter) ([]Plant, boo
 
 	query, args, err := builder.ToSql()
 	if err != nil {
-		return []Plant{}, false, xerr.Join(xerr.ErrInternal, err)
+		return []Plant{}, false, xerrors.Join(xerrors.ErrInternal, err)
 	}
 
 	rows, err := db.db.QueryxContext(ctx, query, args...)
 	if err != nil {
-		return []Plant{}, false, xerr.Join(xerr.ErrInternal, err)
+		return []Plant{}, false, xerrors.Join(xerrors.ErrInternal, err)
 	}
 	defer rows.Close()
 
@@ -291,7 +298,7 @@ func (db Database) plants(ctx context.Context, filter PlantFilter) ([]Plant, boo
 		var i Plant
 		err := rows.StructScan(&i)
 		if err != nil {
-			return []Plant{}, false, xerr.Join(xerr.ErrInternal, err)
+			return []Plant{}, false, xerrors.Join(xerrors.ErrInternal, err)
 		}
 
 		plants = append(plants, i)
@@ -311,7 +318,7 @@ func (db Database) createPlants(ctx context.Context, params PlantParams) (Plant,
 		Suffix("RETURNING *").
 		ToSql()
 	if err != nil {
-		return Plant{}, xerr.Join(xerr.ErrInternal, err)
+		return Plant{}, xerrors.Join(xerrors.ErrInternal, err)
 	}
 
 	row := db.db.QueryRowxContext(ctx, query, args...)
@@ -319,7 +326,7 @@ func (db Database) createPlants(ctx context.Context, params PlantParams) (Plant,
 	var i Plant
 	err = row.StructScan(&i)
 	if err != nil {
-		return Plant{}, xerr.Join(xerr.ErrInternal, err)
+		return Plant{}, xerrors.Join(xerrors.ErrInternal, err)
 	}
 
 	return i, nil
@@ -334,7 +341,7 @@ func (db Database) updatePlant(ctx context.Context, id int64, params PlantParams
 		ToSql()
 
 	if err != nil {
-		return Plant{}, xerr.Join(xerr.ErrInternal, err)
+		return Plant{}, xerrors.Join(xerrors.ErrInternal, err)
 	}
 
 	row := db.db.QueryRowxContext(ctx, query, args...)
@@ -342,7 +349,7 @@ func (db Database) updatePlant(ctx context.Context, id int64, params PlantParams
 	var i Plant
 	err = row.StructScan(&i)
 	if err != nil {
-		return Plant{}, xerr.Join(xerr.ErrInternal, err)
+		return Plant{}, xerrors.Join(xerrors.ErrInternal, err)
 	}
 
 	return i, nil
