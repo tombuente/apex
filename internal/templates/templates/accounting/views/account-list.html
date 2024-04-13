@@ -3,10 +3,10 @@
 
 {{ define "control" }}
 <div class="btn-list">
-	<button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#filter">
+	<!-- <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#filter">
 		Filter
-	</button>
-	<a href="/logistics/items/new" class="btn btn-primary d-none d-sm-inline-block">
+	</button> -->
+	<a href="/accounting/accounts/new" class="btn btn-primary d-none d-sm-inline-block">
 		<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2"
 			stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
 			<path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -19,57 +19,6 @@
 {{ end }}
 
 {{ define "content" }}
-<div id="filter"class="modal modal-blur fade" tabindex="-1">
-	<div class="modal-dialog modal-lg" role="document">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h5 class="modal-title">Item Filter</h5>
-				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-			</div>
-			<form action="/logistics/items">
-				<div class="modal-body">
-					<div class="mb-3">
-						<label class="form-label">Name</label>
-						<input class="form-control" type="text" name="name">
-					</div>
-
-					<div class="mb-3">
-						<label class="form-label">SKU</label>
-						<input class="form-control" type="text" name="sku">
-					</div>
-
-					<div class="mb-3">
-						<label class="form-label">Category</label>
-						<select class="form-select" name="category_id">
-							<option value="">All</option>
-							<option value="1">None</option>
-						</select>
-					</div>
-
-					<div class="mb-3">
-						<label class="form-label">Gross Price</label>
-						<input class="form-control" type="number" name="gross_price">
-					</div>
-
-					<div class="mb-3">
-						<label class="form-label">Net Price</label>
-						<input class="form-control" type="number" name="net_price">
-					</div>
-				</div>
-				<div class="modal-footer">
-					<a href="#" class="btn btn-link link-secondary" data-bs-dismiss="modal">
-						Cancel
-					</a>
-					<a class="btn btn-danger d-none d-sm-inline-block" href="/logistics/items">
-						Reset
-					</a>
-					<input class="btn btn-primary d-none d-sm-inline-block" type="submit" value="Submit">
-				</div>
-			</form>
-		</div>
-	</div>
-</div>
-
 <div class="table-responsive">
 	<table class="table table-vcenter">
 		<thead>

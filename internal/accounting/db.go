@@ -65,12 +65,12 @@ func (db Database) updateAccount(ctx context.Context, id int64, params AccountPa
 	return database.One[Account](ctx, db.db, updateAccountQuery, id, params.Description)
 }
 
-const deleteAccountQuery = `
-UPDATE accounting.accounts
-SET description = $2
-WHERE id = $1
-RETURNING *
-`
+// const deleteAccountQuery = `
+// UPDATE accounting.accounts
+// SET description = $2
+// WHERE id = $1
+// RETURNING *
+// `
 
 // func (db Database) deleteAccount(ctx context.Context, id int64) error {
 // 	return database.Exec(ctx, db.db, deleteAccountQuery, id)

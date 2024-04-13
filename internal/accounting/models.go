@@ -1,6 +1,9 @@
 package accounting
 
-import "database/sql"
+import (
+	"database/sql"
+	"strconv"
+)
 
 type Account struct {
 	ID          int64  `json:"id" db:"id"`
@@ -37,4 +40,8 @@ type DocumentPosition struct {
 	AccountID   int64  `json:"account_id" db:"account_id"`
 	Type        int64  `json:"type" db:"type"`
 	Amount      int64  `json:"amount" db:"amount"`
+}
+
+func (account Account) IDString() string {
+	return strconv.FormatInt(account.ID, 10)
 }

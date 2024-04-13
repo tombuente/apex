@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"fmt"
 
@@ -21,15 +20,16 @@ func Exec(ctx context.Context, db *sqlx.DB, query string, args ...any) error {
 }
 
 func One[T any](ctx context.Context, db *pgx.Conn, query string, args ...any) (T, error) {
+	var defaultT T
 	var i T
 	rows, err := db.Query(ctx, query, args...)
 	if err != nil {
-		return i, wrapError(err)
+		return defaultT, wrapError(err)
 	}
 
 	i, err = pgx.CollectOneRow[T](rows, pgx.RowToStructByNameLax)
 	if err != nil {
-		return i, wrapError(err)
+		return defaultT, wrapError(err)
 	}
 
 	return i, nil
@@ -55,7 +55,7 @@ func Many[T any](ctx context.Context, db *pgx.Conn, query string, args ...any) (
 }
 
 func wrapError(err error) error {
-	if errors.Is(err, sql.ErrNoRows) {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return xerrors.Join(xerrors.ErrNotFound, err)
 	}
 
