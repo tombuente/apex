@@ -11,8 +11,6 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/jackc/pgx/v5"
-	"github.com/jmoiron/sqlx"
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/tombuente/apex/internal/accounting"
 	"github.com/tombuente/apex/internal/logistics"
 	"github.com/tombuente/apex/internal/static"
@@ -26,33 +24,14 @@ func main() {
 	}
 	defer postgres.Close(context.Background())
 
-	db := sqlx.MustConnect("sqlite3", "data.sqlite")
-
-	_, err = db.ExecContext(context.Background(), logistics.Schema)
-	if err != nil {
-		fmt.Println("Unable to load logistics schema:", err)
-		return
-	}
-	_, err = db.ExecContext(context.Background(), logistics.Fixture)
-	if err != nil {
-		fmt.Println("Unable to load logistics fixture:", err)
-		return
-	}
-
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.URLFormat)
 
-	logisticsDB := logistics.NewDatabase(db)
+	logisticsDB := logistics.NewDatabase(postgres)
 	logisticsService := logistics.NewService(logisticsDB)
-
-	logisticsAPIRouter := logistics.NewAPIRouter(logisticsService)
-
-	r.Route("/api", func(r chi.Router) {
-		r.Mount("/logistics", logisticsAPIRouter)
-	})
 
 	logisticsUIRouter, err := logistics.NewUIRouter(logisticsService)
 	if err != nil {

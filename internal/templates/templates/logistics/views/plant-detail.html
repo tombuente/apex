@@ -1,12 +1,12 @@
-{{ define "pretitle" }}Logistics{{ end }}
-{{ define "title" }}Plant {{ .Plant.ID }}{{ end }}
+{{define "pretitle"}}Logistics{{end}}
+{{define "title"}}Plant {{.Resource.ID}}{{end}}
 
-{{ define "control" }}
+{{define "control"}}
 <div class="btn-list">
     <input class="btn btn-primary d-none d-sm-inline-block" type="submit" form="plant-form" value="Submit">
 </div>
-{{ end }}
+{{end}}
 
-{{ define "content" }}
-{{ template "plant-form" . }}
-{{ end }}
+{{define "content"}}
+{{template "plant-form" .}}
+{{end}}

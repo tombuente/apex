@@ -1,30 +1,33 @@
-{{ define "item-form" }}
-<form id="form" action="{{ .Action }}" method="post">
+{{define "item-form"}}
+<form id="form" action="/logistics/items{{if .Resource}}/{{.Resource.ID}}{{end}}" method="post">
     <div class="mb-3">
         <label class="form-label" required>Name</label>
-        <input class="form-control" type="text" name="name" {{ if .Item }}value="{{ .Item.Name }}"{{ end }} required>
+        <input class="form-control" type="text" name="name" {{if .Resource}}value="{{.Resource.Name}}"{{end}} required>
     </div>
 
     <div class="mb-3">
         <label class="form-label" required>SKU</label>
-        <input class="form-control" type="text" name="sku" {{ if .Item }}value="{{ .Item.SKU }}"{{ end }} required>
+        <input class="form-control" type="text" name="sku" {{if .Resource}}value="{{.Resource.SKU}}"{{end}} required>
     </div>
 
     <div class="mb-3">
         <label class="form-label" required>Category</label>
         <select class="form-select" name="category_id">
-            <option value="1">None</option>
+            {{range .Categories}}
+            <option value="{{.ID}}">{{.Name}}</option>
+            {{end}}
         </select>
     </div>
 
     <div class="mb-3">
         <label class="form-label">Gross Price</label>
-        <input class="form-control" type="number" name="gross_price" {{ if .Item }}value="{{ .Item.GrossPrice }}"{{ end }}>
+        <input class="form-control" type="number" name="gross_price" {{if .Resource}}value="{{.Resource.GrossPrice}}"{{end}}>
     </div>
 
     <div class="mb-3">
         <label class="form-label">Net Price</label>
-        <input class="form-control" type="number" name="net_price" {{ if .Item }}value="{{ .Item.NetPrice }}"{{ end }}>
+        <input class="form-control" type="number" name="net_price" {{if .Resource}}value="{{.Resource.NetPrice}}"{{end}}>
     </div>
 </form>
-{{ end }}
+
+{{end}}

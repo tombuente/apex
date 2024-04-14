@@ -1,7 +1,7 @@
-{{ define "pretitle" }}Logistics{{ end }}
-{{ define "title" }}Addresses{{ end }}
+{{define "pretitle"}}Logistics{{end}}
+{{define "title"}}Addresses{{end}}
 
-{{ define "control" }}
+{{define "control"}}
 <div class="btn-list">
 	<button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#item-filter">
 		Filter
@@ -16,9 +16,9 @@
 		Create new address
 	</a>
 </div>
-{{ end }}
+{{end}}
 
-{{ define "content" }}
+{{define "content"}}
 <div class="table-responsive">
 	<table class="table table-vcenter">
 		<thead>
@@ -27,7 +27,6 @@
 				<th>ZIP</th>
 				<th>City</th>
 				<th>Street</th>
-				<th>Street Number</th>
 				<th>Country</th>
                 <th>Longitude</th>
                 <th>Latitude</th>
@@ -35,18 +34,17 @@
 			</tr>
 		</thead>
 		<tbody>
-			{{ range .Addresses }}
+			{{range .Resources}}
 			<tr>
-				<td>{{ .ID }}</td>
-				<td>{{ .ZIP }}</td>
-				<td>{{ .City }}</td>
-				<td>{{ .Street }}</td>
-				<td>{{ .StreetNumber }}</td>
-				<td>{{ .Country }}</td>
-                <td>{{ .Longitude }}</td>
-                <td>{{ .Latitude }}</td>
+				<td>{{.ID}}</td>
+				<td>{{.ZIP}}</td>
+				<td>{{.City}}</td>
+				<td>{{.Street}}</td>
+				<td>{{.Country}}</td>
+                <td>{{.Longitude}}</td>
+                <td>{{.Latitude}}</td>
 				<td>
-					<a href="/logistics/addresses/{{ .ID }}">
+					<a href="/logistics/addresses/{{.ID}}">
 						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
 							stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
 							class="icon icon-tabler icons-tabler-outline icon-tabler-edit">
@@ -62,4 +60,4 @@
 		</tbody>
 	</table>
 </div>
-{{ end }}
+{{end}}

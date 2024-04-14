@@ -1,7 +1,7 @@
-{{ define "pretitle" }}Accounting{{ end }}
-{{ define "title" }}Accounts{{ end }}
+{{define "pretitle"}}Accounting{{end}}
+{{define "title"}}Accounts{{end}}
 
-{{ define "control" }}
+{{define "control"}}
 <div class="btn-list">
 	<!-- <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#filter">
 		Filter
@@ -16,9 +16,9 @@
 		Create new account
 	</a>
 </div>
-{{ end }}
+{{end}}
 
-{{ define "content" }}
+{{define "content"}}
 <div class="table-responsive">
 	<table class="table table-vcenter">
 		<thead>
@@ -29,12 +29,12 @@
 			</tr>
 		</thead>
 		<tbody>
-			{{ range .Accounts }}
+			{{range .Accounts}}
 			<tr>
 				<td>{{.ID}}</td>
 				<td>{{.Description}}</td>
 				<td>
-					<a href="/accounting/accounts/{{ .ID }}">
+					<a href="/accounting/accounts/{{.ID}}">
 						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
 							stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
 							class="icon icon-tabler icons-tabler-outline icon-tabler-edit">
@@ -50,4 +50,4 @@
 		</tbody>
 	</table>
 </div>
-{{ end }}
+{{end}}

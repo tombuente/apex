@@ -7,17 +7,8 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/jmoiron/sqlx"
 	"github.com/tombuente/apex/internal/xerrors"
 )
-
-func Exec(ctx context.Context, db *sqlx.DB, query string, args ...any) error {
-	if _, err := db.ExecContext(context.Background(), query, args...); err != nil {
-		return xerrors.ErrInternal
-	}
-
-	return nil
-}
 
 func One[T any](ctx context.Context, db *pgx.Conn, query string, args ...any) (T, error) {
 	var defaultT T

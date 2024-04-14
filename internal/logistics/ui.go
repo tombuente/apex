@@ -1,15 +1,19 @@
 package logistics
 
 import (
+	"context"
+	"database/sql"
 	"fmt"
 	"html/template"
-	"log/slog"
 	"net/http"
+	"net/url"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/gorilla/schema"
 	"github.com/tombuente/apex/internal/templates"
+	"github.com/tombuente/apex/internal/xerrors"
+	"github.com/tombuente/apex/internal/xui"
 )
 
 var decoder = schema.NewDecoder()
@@ -35,27 +39,27 @@ func NewUIRouter(service Service) (chi.Router, error) {
 	r.Get("/", ui.indexView)
 
 	r.Route("/items", func(r chi.Router) {
-		r.Get("/{id}", ui.itemDetailView)
-		r.Post("/{id}", ui.itemUpdate)
-		r.Get("/", ui.itemListView)
-		r.Post("/", ui.itemCreate)
-		r.Get("/new", ui.itemCreateView)
+		r.Get("/{id}", xui.DetailViewWithData(ui.service.item, ui.newItemData, ui.templates["item-detail"]))
+		r.Post("/{id}", xui.Update("/logistics/items", ui.service.updateItem))
+		r.Get("/", xui.ListView(ui.newItemFilter, ui.service.items, ui.templates["item-list"]))
+		r.Get("/new", xui.CreateViewWithData(ui.newItemData, ui.templates["item-create"]))
+		r.Post("/", xui.Create("/logistics/items", ui.service.createItem))
 	})
 
 	r.Route("/plants", func(r chi.Router) {
-		r.Get("/{id}", ui.plantDetailView)
-		r.Post("/{id}", ui.plantUpdate)
-		r.Get("/", ui.plantListView)
-		r.Post("/", ui.plantCreate)
-		r.Get("/new", ui.plantCreateView)
+		r.Get("/{id}", xui.DetailViewWithData(ui.service.plant, ui.newPlantData, ui.templates["plant-detail"]))
+		r.Post("/{id}", xui.Update("/logistics/plants", ui.service.updatePlant))
+		r.Get("/", xui.ListView(ui.newPlantFilter, ui.service.plants, ui.templates["plant-list"]))
+		r.Get("/new", xui.CreateViewWithData(ui.newPlantData, ui.templates["plant-create"]))
+		r.Post("/", xui.Create("/logistics/plants", ui.service.createPlant))
 	})
 
 	r.Route("/addresses", func(r chi.Router) {
-		r.Get("/{id}", ui.addressDetailView)
-		r.Post("/{id}", ui.addressUpdate)
-		r.Get("/", ui.addressListView)
-		r.Post("/", ui.addressCreate)
-		r.Get("/new", ui.addressCreateView)
+		r.Get("/{id}", xui.DetailView(ui.service.address, ui.templates["address-detail"]))
+		r.Post("/{id}", xui.Update("/logistics/addresses", ui.service.updateAddress))
+		r.Get("/", xui.ListView(ui.newAddressFilter, ui.service.addresses, ui.templates["address-list"]))
+		r.Get("/new", xui.CreateView[Address](ui.templates["address-create"]))
+		r.Post("/", xui.Create("/logistics/addresses", ui.service.createAddress))
 	})
 
 	return r, nil
@@ -68,417 +72,93 @@ func (ui UI) indexView(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (ui UI) itemListView(w http.ResponseWriter, r *http.Request) {
-	name := r.URL.Query().Get("name")
-	sku := r.URL.Query().Get("sku")
-	hasCategoryID := true
-	categoryID, err := strconv.ParseInt(r.URL.Query().Get("category_id"), 10, 64)
+type itemData struct {
+	Resource   *Item
+	Categories []ItemCategory
+}
+
+func (ui UI) newItemData(ctx context.Context, item *Item) (itemData, error) {
+	categories, err := ui.service.itemCategories(ctx)
 	if err != nil {
-		hasCategoryID = false
-	}
-	hasGrossPrice := true
-	grossPrice, err := strconv.ParseInt(r.URL.Query().Get("gross_price"), 10, 64)
-	if err != nil {
-		hasGrossPrice = false
-	}
-	hasNetPrice := true
-	netPrice, err := strconv.ParseInt(r.URL.Query().Get("net_price"), 10, 64)
-	if err != nil {
-		hasNetPrice = false
+		return itemData{}, err
 	}
 
-	var filter ItemFilter
+	return itemData{
+		Resource:   item,
+		Categories: categories,
+	}, nil
+}
+
+func (ui UI) newItemFilter(ctx context.Context, values url.Values) (ItemFilter, error) {
+	name := values.Get("name")
+	sku := values.Get("sku")
+	categoryID := values.Get("category_id")
+	grossPrice := values.Get("gross_price")
+	netPrice := values.Get("net_price")
+
+	filter := ItemFilter{}
+
 	if name != "" {
-		filter.name = &name
+		filter.name = sql.NullString{Valid: true, String: name}
 	}
 	if sku != "" {
-		filter.sku = &sku
+		filter.sku = sql.NullString{Valid: true, String: sku}
 	}
-	if hasCategoryID {
-		filter.categoryID = &categoryID
+	if categoryID != "" {
+		categoryID, err := strconv.ParseInt(categoryID, 10, 64)
+		if err != nil {
+			return ItemFilter{}, fmt.Errorf("%w: unable to convert category id to integer", xerrors.ErrBadRequest)
+		}
+		filter.categoryID = sql.NullInt64{Valid: true, Int64: categoryID}
 	}
-	if hasGrossPrice {
-		filter.GrossPrice = &grossPrice
+	if grossPrice != "" {
+		grossPrice, err := strconv.ParseInt(grossPrice, 10, 64)
+		if err != nil {
+			return ItemFilter{}, fmt.Errorf("%w: unable to convert gross price to integer", xerrors.ErrBadRequest)
+		}
+		filter.categoryID = sql.NullInt64{Valid: true, Int64: grossPrice}
 	}
-	if hasNetPrice {
-		filter.NetPrice = &netPrice
+	if netPrice != "" {
+		netPrice, err := strconv.ParseInt(netPrice, 10, 64)
+		if err != nil {
+			return ItemFilter{}, fmt.Errorf("%w: unable to convert net price to integer", xerrors.ErrBadRequest)
+		}
+		filter.categoryID = sql.NullInt64{Valid: true, Int64: netPrice}
 	}
 
-	items, _, err := ui.service.items(r.Context(), filter)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	ctx := struct {
-		Items []Item
-	}{
-		Items: items,
-	}
-
-	err = ui.templates["item-list"].Execute(w, ctx)
-	if err != nil {
-		slog.Error("Unable to execute template", "error", err)
-	}
+	return filter, nil
 }
 
-func (ui UI) itemDetailView(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
+func (ui UI) newAddressFilter(ctx context.Context, values url.Values) (AddressFilter, error) {
+	filter := AddressFilter{
+		zip:       sql.NullString{},
+		city:      sql.NullString{},
+		street:    sql.NullString{},
+		country:   sql.NullString{},
+		latitude:  sql.NullFloat64{},
+		longitude: sql.NullFloat64{},
 	}
 
-	item, ok, err := ui.service.item(r.Context(), ItemFilter{id: &id})
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	if !ok {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-
-	ctx := struct {
-		Action string
-		Item   *Item
-	}{
-		Action: fmt.Sprintf("/logistics/items/%v", id),
-		Item:   &item,
-	}
-
-	err = ui.templates["item-detail"].Execute(w, ctx)
-	if err != nil {
-		slog.Error("Unable to execute template", "error", err)
-	}
+	return filter, nil
 }
 
-func (ui UI) itemCreateView(w http.ResponseWriter, r *http.Request) {
-	ctx := struct {
-		Action string
-		Item   *Item
-	}{
-		Action: "/logistics/items",
-		Item:   nil,
-	}
-
-	err := ui.templates["item-create"].Execute(w, ctx)
-	if err != nil {
-		slog.Error("Unable to execute template", "error", err)
-	}
+type plantData struct {
+	Resource  *Plant
+	Addresses []Address
 }
 
-func (ui UI) itemCreate(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
+func (ui UI) newPlantData(ctx context.Context, plant *Plant) (plantData, error) {
+	addresses, err := ui.service.addresses(ctx, AddressFilter{})
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
+		return plantData{}, err
 	}
 
-	var params ItemParams
-	err = decoder.Decode(&params, r.PostForm)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	_, err = ui.service.createItem(r.Context(), params)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	http.Redirect(w, r, "/logistics/items", http.StatusFound)
-}
-
-func (ui UI) itemUpdate(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
-	if err != nil {
-		slog.Info("Unable to parse id", "endpoint", "itemUpdate", "error", err)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	err = r.ParseForm()
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	var params ItemParams
-	err = decoder.Decode(&params, r.PostForm)
-	if err != nil {
-		slog.Info("Unable to decode form", "endpoint", "itemUpdate", "error", err)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	_, err = ui.service.updateItem(r.Context(), id, params)
-	if err != nil {
-		slog.Info("Unable to update database with params", "endpoint", "itemUpdate", "error", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	http.Redirect(w, r, "/logistics/items", http.StatusFound)
-}
-
-func (ui UI) addressListView(w http.ResponseWriter, r *http.Request) {
-	var filter AddressFilter
-
-	addresses, _, err := ui.service.addresses(r.Context(), filter)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	ctx := struct {
-		Addresses []Address
-	}{
+	return plantData{
+		Resource:  plant,
 		Addresses: addresses,
-	}
-
-	err = ui.templates["address-list"].Execute(w, ctx)
-	if err != nil {
-		slog.Error("Unable to execute template", "error", err)
-	}
+	}, nil
 }
 
-func (ui UI) addressDetailView(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	address, ok, err := ui.service.address(r.Context(), AddressFilter{id: &id})
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	if !ok {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-
-	ctx := struct {
-		Action  string
-		Address *Address
-	}{
-		Action:  fmt.Sprintf("/logistics/addresses/%v", id),
-		Address: &address,
-	}
-
-	err = ui.templates["address-detail"].Execute(w, ctx)
-	if err != nil {
-		slog.Error("Unable to execute template", "error", err)
-	}
-}
-
-func (ui UI) addressCreateView(w http.ResponseWriter, r *http.Request) {
-	ctx := struct {
-		Action  string
-		Address *Address
-	}{
-		Action:  "/logistics/addresses",
-		Address: nil,
-	}
-
-	err := ui.templates["address-create"].Execute(w, ctx)
-	if err != nil {
-		slog.Error("Unable to execute template", "error", err)
-	}
-}
-
-func (ui UI) addressCreate(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	var params AddressParams
-	err = decoder.Decode(&params, r.PostForm)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	_, err = ui.service.createAddress(r.Context(), params)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	http.Redirect(w, r, "/logistics/addresses", http.StatusFound)
-}
-
-func (ui UI) addressUpdate(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
-	if err != nil {
-		slog.Info("Unable to parse id", "endpoint", "addressUpdate", "error", err)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	err = r.ParseForm()
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	var params AddressParams
-	err = decoder.Decode(&params, r.PostForm)
-	if err != nil {
-		slog.Info("Unable to decode form", "endpoint", "addressUpdate", "error", err)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	_, err = ui.service.updateAddress(r.Context(), id, params)
-	if err != nil {
-		slog.Info("Unable to update database with params", "endpoint", "addressUpdate", "error", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	http.Redirect(w, r, "/logistics/addresses", http.StatusFound)
-}
-
-func (ui UI) plantListView(w http.ResponseWriter, r *http.Request) {
-	var filter PlantFilter
-
-	plants, _, err := ui.service.plants(r.Context(), filter)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	ctx := struct {
-		Plants []Plant
-	}{
-		Plants: plants,
-	}
-
-	err = ui.templates["plant-list"].Execute(w, ctx)
-	if err != nil {
-		slog.Error("Unable to execute template", "error", err)
-	}
-}
-
-func (ui UI) plantDetailView(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	plant, ok, err := ui.service.plant(r.Context(), PlantFilter{id: &id})
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	if !ok {
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-
-	addresses, _, err := ui.service.addresses(r.Context(), AddressFilter{})
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	ctx := struct {
-		PlantFormAction string
-		Plant           *Plant
-		Addresses       []Address
-	}{
-		PlantFormAction: fmt.Sprintf("/logistics/plants/%v", id),
-		Plant:           &plant,
-		Addresses:       addresses,
-	}
-
-	err = ui.templates["plant-detail"].Execute(w, ctx)
-	if err != nil {
-		slog.Error("Unable to execute template", "error", err)
-	}
-}
-
-func (ui UI) plantCreateView(w http.ResponseWriter, r *http.Request) {
-	addresses, _, err := ui.service.addresses(r.Context(), AddressFilter{})
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	ctx := struct {
-		PlantFormAction string
-		Plant           *Address
-		Addresses       []Address
-	}{
-		PlantFormAction: "/logistics/plants",
-		Plant:           nil,
-		Addresses:       addresses,
-	}
-
-	err = ui.templates["plant-create"].Execute(w, ctx)
-	if err != nil {
-		slog.Error("Unable to execute template", "error", err)
-	}
-}
-
-func (ui UI) plantCreate(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	var params PlantParams
-	err = decoder.Decode(&params, r.PostForm)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	_, err = ui.service.createPlant(r.Context(), params)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	http.Redirect(w, r, "/logistics/plants", http.StatusFound)
-}
-
-func (ui UI) plantUpdate(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
-	if err != nil {
-		slog.Info("Unable to parse id", "endpoint", "addressUpdate", "error", err)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	err = r.ParseForm()
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	var params PlantParams
-	err = decoder.Decode(&params, r.PostForm)
-	if err != nil {
-		slog.Info("Unable to decode form", "endpoint", "addressUpdate", "error", err)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	_, err = ui.service.db.updatePlant(r.Context(), id, params)
-	if err != nil {
-		slog.Info("Unable to update database with params", "endpoint", "addressUpdate", "error", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	http.Redirect(w, r, "/logistics/plants", http.StatusFound)
+func (ui UI) newPlantFilter(ctx context.Context, values url.Values) (PlantFilter, error) {
+	return PlantFilter{}, nil
 }

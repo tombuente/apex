@@ -1,12 +1,12 @@
-{{ define "pretitle" }}Accounting{{ end }}
-{{ define "title" }}Account {{ .Resource.ID }}{{ end }}
+{{define "pretitle"}}Accounting{{end}}
+{{define "title"}}Account {{.Resource.ID}}{{end}}
 
-{{ define "control" }}
+{{define "control"}}
 <div class="btn-list">
     <input class="btn btn-primary d-none d-sm-inline-block" type="submit" form="account-form" value="Update">
 </div>
-{{ end }}
+{{end}}
 
-{{ define "content" }}
-{{ template "account-form" . }}
-{{ end }}
+{{define "content"}}
+{{template "account-form" .}}
+{{end}}

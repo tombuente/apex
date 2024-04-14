@@ -7,8 +7,9 @@ import (
 )
 
 var (
-	ErrInternal = errors.New("internal error")
-	ErrNotFound = errors.New("not found")
+	ErrInternal   = errors.New("internal error")
+	ErrBadRequest = errors.New("bad request")
+	ErrNotFound   = errors.New("not found")
 )
 
 func Join(err1 error, err2 error) error {
@@ -25,6 +26,8 @@ func ErrorInfo(err error) (int, string) {
 	switch {
 	case errors.Is(err, ErrNotFound):
 		return http.StatusNotFound, ErrNotFound.Error()
+	case errors.Is(err, ErrBadRequest):
+		return http.StatusBadRequest, ErrBadRequest.Error()
 	}
 
 	return http.StatusInternalServerError, ErrInternal.Error()

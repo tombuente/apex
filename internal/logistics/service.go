@@ -16,11 +16,15 @@ func NewService(db Database) Service {
 	}
 }
 
-func (s Service) item(ctx context.Context, filter ItemFilter) (Item, bool, error) {
-	return s.db.item(ctx, filter)
+func (s Service) itemCategories(ctx context.Context) ([]ItemCategory, error) {
+	return s.db.itemCategories(ctx)
 }
 
-func (s Service) items(ctx context.Context, filter ItemFilter) ([]Item, bool, error) {
+func (s Service) item(ctx context.Context, id int64) (Item, error) {
+	return s.db.item(ctx, id)
+}
+
+func (s Service) items(ctx context.Context, filter ItemFilter) ([]Item, error) {
 	return s.db.items(ctx, filter)
 }
 
@@ -32,11 +36,11 @@ func (s Service) updateItem(ctx context.Context, id int64, params ItemParams) (I
 	return s.db.updateItem(ctx, id, params)
 }
 
-func (s Service) address(ctx context.Context, filter AddressFilter) (Address, bool, error) {
-	return s.db.address(ctx, filter)
+func (s Service) address(ctx context.Context, id int64) (Address, error) {
+	return s.db.address(ctx, id)
 }
 
-func (s Service) addresses(ctx context.Context, filter AddressFilter) ([]Address, bool, error) {
+func (s Service) addresses(ctx context.Context, filter AddressFilter) ([]Address, error) {
 	return s.db.addresses(ctx, filter)
 }
 
@@ -48,16 +52,16 @@ func (s Service) updateAddress(ctx context.Context, id int64, params AddressPara
 	return s.db.updateAddress(ctx, id, params)
 }
 
-func (s Service) plant(ctx context.Context, filter PlantFilter) (Plant, bool, error) {
-	return s.db.plant(ctx, filter)
+func (s Service) plant(ctx context.Context, id int64) (Plant, error) {
+	return s.db.plant(ctx, id)
 }
 
-func (s Service) plants(ctx context.Context, filter PlantFilter) ([]Plant, bool, error) {
+func (s Service) plants(ctx context.Context, filter PlantFilter) ([]Plant, error) {
 	return s.db.plants(ctx, filter)
 }
 
 func (s Service) createPlant(ctx context.Context, params PlantParams) (Plant, error) {
-	return s.db.createPlants(ctx, params)
+	return s.db.createPlant(ctx, params)
 }
 
 func (s Service) updatePlant(ctx context.Context, id int64, params PlantParams) (Plant, error) {
