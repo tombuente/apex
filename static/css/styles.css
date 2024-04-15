@@ -15,12 +15,12 @@
 }
 
 .navbar-vertical.navbar-expand-lg {
-    width: 18rem;
+    /* width: 18rem; */
     border-right: 1px solid var(--tblr-light-darken);
 }
 
 .page-wrapper {
-    margin-left: 18rem;
+    /* margin-left: 18rem; */
 }
 
 .dropdown-menu .dropdown-menu-column {

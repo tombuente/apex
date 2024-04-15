@@ -43,3 +43,7 @@ func (s Service) currencies(ctx context.Context) ([]Currency, error) {
 func (s Service) documentPositionTypes(ctx context.Context) ([]DocumentPositionType, error) {
 	return s.db.documentPositionTypes(ctx)
 }
+
+func (s Service) createDocument(ctx context.Context, params DocumentParams) ([]DocumentWithPositions, error) {
+	return []DocumentWithPositions{}, nil
+}

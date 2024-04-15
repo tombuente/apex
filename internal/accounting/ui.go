@@ -44,6 +44,7 @@ func NewUIRouter(service Service) (chi.Router, error) {
 
 	r.Route("/documents", func(r chi.Router) {
 		r.Get("/new", xui.CreateViewWithData(ui.newDocumentData, ui.templates["document-create"]))
+		r.Post("/verify", ui.vertifyDocumentViewHTMX)
 	})
 
 	return r, nil
@@ -100,4 +101,17 @@ func (ui UI) newDocumentData(ctx context.Context, document *Document) (documentD
 		PositionTypes: documentPositionTypes,
 		Positions:     nil,
 	}, nil
+}
+
+func (ui UI) vertifyDocumentViewHTMX(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, "bad request", http.StatusInternalServerError)
+		return
+	}
+
+	ui.templates["document-health.htmx"].ExecuteTemplate(w, "health", nil)
+	if err != nil {
+		slog.Error("Unable to execute template", "error", err)
+	}
 }

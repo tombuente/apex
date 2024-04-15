@@ -38,10 +38,6 @@ type Document struct {
 	CurrencyID  int64  `json:"currency_id" db:"currency_id"`
 }
 
-func (document Document) IDString() string {
-	return strconv.FormatInt(document.ID, 10)
-}
-
 type DocumentPosition struct {
 	ID          int64  `json:"id" db:"id"`
 	DocumentID  int64  `json:"document_id" db:"document_id"`
@@ -51,6 +47,20 @@ type DocumentPosition struct {
 	Amount      int64  `json:"amount" db:"amount"`
 }
 
+type DocumentParams struct {
+	Document
+	Positions []DocumentPosition `json:"positions" schema:"-"`
+}
+
+type DocumentWithPositions struct {
+	Document
+	Positions []DocumentPosition `json:"positions"`
+}
+
 func (account Account) IDString() string {
 	return strconv.FormatInt(account.ID, 10)
+}
+
+func (document Document) IDString() string {
+	return strconv.FormatInt(document.ID, 10)
 }

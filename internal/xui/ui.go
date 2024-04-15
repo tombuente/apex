@@ -15,7 +15,7 @@ import (
 	"github.com/tombuente/apex/internal/xerrors"
 )
 
-var decoder = schema.NewDecoder()
+var Decoder = schema.NewDecoder()
 
 type Resource interface {
 	IDString() string
@@ -140,7 +140,7 @@ func Create[R Resource, P any](
 		}
 
 		var params P
-		err = decoder.Decode(&params, r.PostForm)
+		err = Decoder.Decode(&params, r.PostForm)
 		if err != nil {
 			slog.Error("Unable to decode form", "error", err)
 			http.Error(w, "unable to decode form", http.StatusBadRequest)
@@ -175,7 +175,7 @@ func Update[R Resource, P any](
 		}
 
 		var params P
-		err = decoder.Decode(&params, r.PostForm)
+		err = Decoder.Decode(&params, r.PostForm)
 		if err != nil {
 			http.Error(w, "unable to decode form", http.StatusBadRequest)
 			return
