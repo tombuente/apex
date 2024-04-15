@@ -1,0 +1,12 @@
+{{define "pretitle"}}Accounting{{end}}
+{{define "title"}}New document{{end}}
+
+{{define "control"}}
+<div class="btn-list">
+    <input class="btn btn-primary d-none d-sm-inline-block" type="submit" form="document-form" value="Submit">
+</div>
+{{end}}
+
+{{define "content"}}
+{{template "document-form" .}}
+{{end}}

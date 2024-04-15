@@ -75,3 +75,21 @@ func (db Database) updateAccount(ctx context.Context, id int64, params AccountPa
 // func (db Database) deleteAccount(ctx context.Context, id int64) error {
 // 	return database.Exec(ctx, db.db, deleteAccountQuery, id)
 // }
+
+const currenciesQuery = `
+SELECT *
+FROM accounting.currencies
+`
+
+func (db Database) currencies(ctx context.Context) ([]Currency, error) {
+	return database.Many[Currency](ctx, db.db, currenciesQuery)
+}
+
+const documentPositionTypesQuery = `
+SELECT *
+FROM accounting.document_position_types
+`
+
+func (db Database) documentPositionTypes(ctx context.Context) ([]DocumentPositionType, error) {
+	return database.Many[DocumentPositionType](ctx, db.db, documentPositionTypesQuery)
+}

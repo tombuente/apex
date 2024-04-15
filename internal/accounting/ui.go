@@ -1,6 +1,7 @@
 package accounting
 
 import (
+	"context"
 	"errors"
 	"html/template"
 	"log/slog"
@@ -41,6 +42,10 @@ func NewUIRouter(service Service) (chi.Router, error) {
 		r.Post("/", xui.Create("/accounting/accounts", ui.service.createAccount))
 	})
 
+	r.Route("/documents", func(r chi.Router) {
+		r.Get("/new", xui.CreateViewWithData(ui.newDocumentData, ui.templates["document-create"]))
+	})
+
 	return r, nil
 }
 
@@ -62,4 +67,37 @@ func (ui UI) accountListView(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		slog.Error("Unable to execute template", "error", err)
 	}
+}
+
+type documentData struct {
+	Resource      *Document
+	Accounts      []Account
+	Currencies    []Currency
+	PositionTypes []DocumentPositionType
+	Positions     []DocumentPosition
+}
+
+func (ui UI) newDocumentData(ctx context.Context, document *Document) (documentData, error) {
+	accounts, err := ui.service.accounts(ctx, AccountFilter{})
+	if err != nil {
+		return documentData{}, nil
+	}
+
+	currencies, err := ui.service.currencies(ctx)
+	if err != nil {
+		return documentData{}, err
+	}
+
+	documentPositionTypes, err := ui.service.documentPositionTypes(ctx)
+	if err != nil {
+		return documentData{}, err
+	}
+
+	return documentData{
+		Resource:      document,
+		Accounts:      accounts,
+		Currencies:    currencies,
+		PositionTypes: documentPositionTypes,
+		Positions:     nil,
+	}, nil
 }

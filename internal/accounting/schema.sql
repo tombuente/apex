@@ -22,8 +22,8 @@ CREATE TABLE IF NOT EXISTS accounting.documents(
 );
 
 CREATE TABLE IF NOT EXISTS accounting.document_position_types(
-	id          SERIAL  PRIMARY KEY,
-	document_id INTEGER NOT NULL
+	id          SERIAL       PRIMARY KEY,
+	description VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS accounting.document_positions(
@@ -31,6 +31,6 @@ CREATE TABLE IF NOT EXISTS accounting.document_positions(
 	document_id SERIAL  NOT NULL REFERENCES accounting.documents(id),
 	account_id  SERIAL  NOT NULL REFERENCES accounting.accounts(id),
 	description TEXT    NOT NULL,
-	type_id     INTEGER NOT NULL,
+	type_id     INTEGER NOT NULL REFERENCES accounting.document_position_types(id),
 	amount      NUMERIC NOT NULL
 );

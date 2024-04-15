@@ -24,6 +24,11 @@ type Currency struct {
 	ISO  string `json:"iso" db:"iso"`
 }
 
+type DocumentPositionType struct {
+	ID          int64  `json:"id" db:"id"`
+	Description string `json:"description" db:"description"`
+}
+
 type Document struct {
 	ID          int64  `json:"id" db:"id"`
 	Description string `json:"description" db:"description"`
@@ -31,6 +36,10 @@ type Document struct {
 	PostingDate string `json:"posting_date" db:"posting_date"`
 	Reference   string `json:"reference" db:"reference"`
 	CurrencyID  int64  `json:"currency_id" db:"currency_id"`
+}
+
+func (document Document) IDString() string {
+	return strconv.FormatInt(document.ID, 10)
 }
 
 type DocumentPosition struct {

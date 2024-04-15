@@ -1,5 +1,12 @@
 :root {
-    --tblr-body-bg: #f8f9fa
+    --tblr-body-bg: #55555;
+    --tblr-gutter-y: 0;
+    --tblr-gutter-y: 0;
+}
+
+.row {
+    margin-left: 0;
+    margin-right: 0;
 }
 
 .row > * {

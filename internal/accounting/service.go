@@ -35,3 +35,11 @@ func (s Service) updateAccount(ctx context.Context, id int64, params AccountPara
 // func (s Service) deleteAccount(ctx context.Context, id int64) error {
 // 	return s.db.deleteAccount(ctx, id)
 // }
+
+func (s Service) currencies(ctx context.Context) ([]Currency, error) {
+	return s.db.currencies(ctx)
+}
+
+func (s Service) documentPositionTypes(ctx context.Context) ([]DocumentPositionType, error) {
+	return s.db.documentPositionTypes(ctx)
+}

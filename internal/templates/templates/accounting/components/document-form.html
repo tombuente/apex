@@ -1,0 +1,93 @@
+{{define "document-form"}}
+
+<form id="document-form" action="/accounting/documents{{if .Resource}}/{{.Resource.ID}}{{end}}" method="post">
+
+    <div class="row">
+
+        <div class="col">
+
+            <div class="mb-3 me-2">
+                <label class="form-label" required>Description</label>
+                <input class="form-control" type="text" name="description" {{if .Resource}}value="{{.Resource.Description}}"{{end}} required>
+            </div>
+        
+            <div class="mb-3 me-2">
+                <label class="form-label" required>Date</label>
+                <input class="form-control" type="text" name="date" placeholder="YYYY-MM-DD" {{if .Resource}}value="{{.Resource.Date}}"{{end}} required>
+            </div>
+        
+            <div class="mb-3 me-2">
+                <label class="form-label" required>Posting date</label>
+                <input class="form-control" type="text" name="posting_date" placeholder="YYYY-MM-DD" {{if .Resource}}value="{{.Resource.PostingDate}}"{{end}} required>
+            </div>
+        
+            <div class="mb-3 me-2">
+                <label class="form-label" required>Reference</label>
+                <input class="form-control" type="text" name="reference" {{if .Resource}}value="{{.Resource.Reference}}"{{end}} required>
+            </div>
+    
+        </div>
+
+        <div class="col">
+
+            <div class="mb-3 ms-2">
+                <label class="form-label" required>Currency</label>
+                <select class="form-select" name="currency_id">
+                    {{range .Currencies}}
+                    <option value="{{.ID}}">{{.Name}}({{.ISO}})</option>
+                    {{end}}
+                </select>
+            </div>
+    
+        </div>
+
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-vcenter">
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th>Account</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>...</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <input class="form-control" type="text" name="position_description" required>
+                    </td>
+
+                    <td>
+                        <select class="form-select" name="position_account_id">
+                            {{range .Accounts}}
+                            <option value="{{.ID}}">{{.Description}}</option>
+                            {{end}}
+                        </select>
+                    </td>
+
+                    <td>
+                        <select class="form-select" name="position_type_id">
+                            {{range .PositionTypes}}
+                            <option value="{{.ID}}">{{.Description}}</option>
+                            {{end}}
+                        </select>
+                    </td>
+
+                    <td>
+                        <input class="form-control" type="text" name="position_amount" required>
+                    </td>
+
+                    <td>
+                        Control
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</form>
+
+{{end}}
