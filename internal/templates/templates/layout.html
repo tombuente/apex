@@ -2,174 +2,175 @@
 <html>
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
 
-    <!-- Tabler -->
-    <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/js/tabler.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/css/tabler.min.css">
+	<!-- Tabler -->
+	<script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/js/tabler.min.js"></script>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta17/dist/css/tabler.min.css">
 
-    <!-- Leaflet -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+	<!-- Leaflet -->
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+	<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
-    <!-- HTMX -->
-    <script src="https://unpkg.com/htmx.org@1.9.11" integrity="sha384-0gxUXCCR8yv9FM2b+U3FDbsKthCI66oH5IA9fHppQq9DDMHuMauqq1ZHBpJxQ0J0" crossorigin="anonymous"></script>
+	<!-- HTMX -->
+	<script src="https://unpkg.com/htmx.org@1.9.11" integrity="sha384-0gxUXCCR8yv9FM2b+U3FDbsKthCI66oH5IA9fHppQq9DDMHuMauqq1ZHBpJxQ0J0" crossorigin="anonymous"></script>
 
-    <link rel="stylesheet" href="/static/css/styles.css">
+	<!-- <link rel="stylesheet" href="/static/css/styles.css"> -->
 
-    <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
-    <title>Apex</title>
+	<link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
+
+	<title>Apex</title>
 </head>
 
 <body>
-    <div class="page">
+	<div class="page">
 
-        {{ template "sidebar-nav" }}
+		{{ template "sidebar-nav" }}
 
-        <div class="page-wrapper">
-            <div class="container-xl">
+		<div class="page-wrapper">
+			<div class="container-xl">
 
-                <div class="page-header">
-                    <div class="row align-items-center">
-                        <div class="col">
-                            <div class="page-pretitle">
-                                {{ block "pretitle" . }}{{end}}
-                            </div>
-                            <h2 class="page-title">
-                                {{ block "title" . }}{{end}}
-                            </h2>
-                        </div>
-                        <div class="col-auto ms-auto">
-                            {{ block "control" . }}{{end}}
-                        </div>
-                    </div>
-                </div>
+				<div class="page-header">
+					<div class="row align-items-center">
+						<div class="col">
+							<div class="page-pretitle">
+								{{ block "pretitle" . }}{{end}}
+							</div>
+							<h2 class="page-title">
+								{{ block "title" . }}{{end}}
+							</h2>
+						</div>
+						<div class="col-auto ms-auto">
+							{{ block "control" . }}{{end}}
+						</div>
+					</div>
+				</div>
 
-                <div class="page-body">
-                    <div class="row">
-                        {{ block "content" .}}{{end}}
-                    </div>
-                </div>
+				<div class="page-body">
+					<div class="row row-deck row-cards">
+						{{ block "content" .}}{{end}}
+					</div>
+				</div>
 
-            </div>
-        </div>
-    </div>
+			</div>
+		</div>
+	</div>
 </body>
 
 <script>
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+	const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+	const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
 </script>
 
 {{ define "sidebar-nav" }}
 <aside class="navbar navbar-vertical navbar-expand-lg bg-white">
-    <div class="container-fluid">
-        <div style="margin: var(--tblr-content-padding) 0 0;">
-            <h1>
-                <a class="d-inline-flex align-items-center text-decoration-none w-100" style="margin-left: 12px;"
-                    href="/">
-                    <img src="/static/images/favicon.ico" width="110" height="32" alt="Tabler"
-                        class="navbar-brand-image">
-                    <span class="ms-2">Apex</span>
-                </a>
-            </h1>
-        </div>
+	<div class="container-fluid">
+		<div style="margin: var(--tblr-content-padding) 0 0;">
+			<h1>
+				<a class="d-inline-flex align-items-center text-decoration-none w-100" style="margin-left: 12px;"
+					href="/">
+					<img src="/static/images/favicon.ico" width="110" height="32" alt="Tabler"
+						class="navbar-brand-image">
+					<span class="ms-2">Apex</span>
+				</a>
+			</h1>
+		</div>
 
-        <div class="collapse navbar-collapse" id="sidebar-menu">
-            <ul class="navbar-nav pt-lg-3">
+		<div class="collapse navbar-collapse" id="sidebar-menu">
+			<ul class="navbar-nav pt-lg-3">
 
-                <li class="nav-item">
-                    <a class="nav-link" href="/"> <!-- Home -->
-                        <span class="nav-link-icon d-md-none d-lg-inline-block">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
-                                viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
-                                stroke-linecap="round" stroke-linejoin="round">
-                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                <path d="M5 12l-2 0l9 -9l9 9l-2 0"></path>
-                                <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7"></path>
-                                <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6"></path>
-                            </svg>
-                        </span>
-                        <span class="nav-link-title">
-                            Home
-                        </span>
-                    </a>
-                </li>
+				<li class="nav-item">
+					<a class="nav-link" href="/"> <!-- Home -->
+						<span class="nav-link-icon d-md-none d-lg-inline-block">
+							<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
+								viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+								stroke-linecap="round" stroke-linejoin="round">
+								<path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+								<path d="M5 12l-2 0l9 -9l9 9l-2 0"></path>
+								<path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7"></path>
+								<path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6"></path>
+							</svg>
+						</span>
+						<span class="nav-link-title">
+							Home
+						</span>
+					</a>
+				</li>
 
-                <li class="nav-item dropdown"> <!-- Logistics -->
-                    <a class="nav-link dropdown-toggle" href="#navbar-base" data-bs-toggle="dropdown"
-                        data-bs-auto-close="false" role="button" aria-expanded="false">
-                        <span class="nav-link-icon d-md-none d-lg-inline-block">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
-                                viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
-                                stroke-linecap="round" stroke-linejoin="round">
-                                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                                <path d="M12 3l8 4.5l0 9l-8 4.5l-8 -4.5l0 -9l8 -4.5"></path>
-                                <path d="M12 12l8 -4.5"></path>
-                                <path d="M12 12l0 9"></path>
-                                <path d="M12 12l-8 -4.5"></path>
-                                <path d="M16 5.25l-8 4.5"></path>
-                            </svg>
-                        </span>
-                        <span class="nav-link-title">
-                            Logistics
-                        </span>
-                    </a>
+				<li class="nav-item dropdown"> <!-- Logistics -->
+					<a class="nav-link dropdown-toggle" href="#navbar-base" data-bs-toggle="dropdown"
+						data-bs-auto-close="false" role="button" aria-expanded="false">
+						<span class="nav-link-icon d-md-none d-lg-inline-block">
+							<svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24"
+								viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none"
+								stroke-linecap="round" stroke-linejoin="round">
+								<path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+								<path d="M12 3l8 4.5l0 9l-8 4.5l-8 -4.5l0 -9l8 -4.5"></path>
+								<path d="M12 12l8 -4.5"></path>
+								<path d="M12 12l0 9"></path>
+								<path d="M12 12l-8 -4.5"></path>
+								<path d="M16 5.25l-8 4.5"></path>
+							</svg>
+						</span>
+						<span class="nav-link-title">
+							Logistics
+						</span>
+					</a>
 
-                    <div class="dropdown-menu">
-                        <div class="dropdown-menu-columns">
-                            <div class="dropdown-menu-column">
-                                <a class="dropdown-item" href="/logistics/items">
-                                    Items
-                                </a>
-                                <a class="dropdown-item" href="/logistics/plants">
-                                    Plants
-                                </a>
-                                <a class="dropdown-item" href="/logistics/addresses">
-                                    Addresses
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                </li>
+					<div class="dropdown-menu">
+						<div class="dropdown-menu-columns">
+							<div class="dropdown-menu-column">
+								<a class="dropdown-item" href="/logistics/items">
+									Items
+								</a>
+								<a class="dropdown-item" href="/logistics/plants">
+									Plants
+								</a>
+								<a class="dropdown-item" href="/logistics/addresses">
+									Addresses
+								</a>
+							</div>
+						</div>
+					</div>
 
-                <li class="nav-item dropdown"> <!-- Sales -->
-                    <a class="nav-link dropdown-toggle" href="#navbar-base" data-bs-toggle="dropdown"
-                        data-bs-auto-close="false" role="button" aria-expanded="false">
-                        <span class="nav-link-icon d-md-none d-lg-inline-block">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
-                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                stroke-linejoin="round"
-                                class="icon icon-tabler icons-tabler-outline icon-tabler-report-money">
-                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                <path
-                                    d="M9 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-12a2 2 0 0 0 -2 -2h-2" />
-                                <path
-                                    d="M9 3m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v0a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z" />
-                                <path d="M14 11h-2.5a1.5 1.5 0 0 0 0 3h1a1.5 1.5 0 0 1 0 3h-2.5" />
-                                <path d="M12 17v1m0 -8v1" />
-                            </svg>
-                        </span>
-                        <span class="nav-link-title">
-                            Accounting
-                        </span>
-                    </a>
-                    <div class="dropdown-menu">
-                        <div class="dropdown-menu-columns">
-                            <div class="dropdown-menu-column">
-                                <a class="dropdown-item" href="/accounting/accounts">
-                                    Accounts
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </li>
-            </ul>
-        </div>
-    </div>
+				</li>
+
+				<li class="nav-item dropdown"> <!-- Sales -->
+					<a class="nav-link dropdown-toggle" href="#navbar-base" data-bs-toggle="dropdown"
+						data-bs-auto-close="false" role="button" aria-expanded="false">
+						<span class="nav-link-icon d-md-none d-lg-inline-block">
+							<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+								fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+								stroke-linejoin="round"
+								class="icon icon-tabler icons-tabler-outline icon-tabler-report-money">
+								<path stroke="none" d="M0 0h24v24H0z" fill="none" />
+								<path
+									d="M9 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-12a2 2 0 0 0 -2 -2h-2" />
+								<path
+									d="M9 3m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v0a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z" />
+								<path d="M14 11h-2.5a1.5 1.5 0 0 0 0 3h1a1.5 1.5 0 0 1 0 3h-2.5" />
+								<path d="M12 17v1m0 -8v1" />
+							</svg>
+						</span>
+						<span class="nav-link-title">
+							Accounting
+						</span>
+					</a>
+					<div class="dropdown-menu">
+						<div class="dropdown-menu-columns">
+							<div class="dropdown-menu-column">
+								<a class="dropdown-item" href="/accounting/accounts">
+									Accounts
+								</a>
+							</div>
+						</div>
+					</div>
+				</li>
+			</ul>
+		</div>
+	</div>
 </aside>
 {{ end}}

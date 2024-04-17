@@ -1,45 +1,57 @@
 {{define "address-form"}}
-<form id="address-form" action="/logistics/addresses{{if .Resource}}/{{.Resource.ID}}{{end}}" method="post">
-	<div class="mb-3">
-		<label class="form-label" required>ZIP</label>
-		<input class="form-control" type="text" name="zip" {{if .Resource}}value="{{.Resource.ZIP}}" {{end}} required>
-	</div>
 
-	<div class="mb-3">
-		<label class="form-label" required>City</label>
-		<input class="form-control" type="text" name="city" {{if .Resource}}value="{{.Resource.City}}" {{end}} required>
-	</div>
+<div class="col-12">
+	<div class="card">
+		<div class="card-body">
 
-	<div class="mb-3">
-		<label class="form-label" required>Street</label>
-		<input class="form-control" type="text" name="street" {{if .Resource}}value="{{.Resource.Street}}" {{end}}required>
-	</div>
+			<form id="address-form" action="/logistics/addresses{{if .Resource}}/{{.Resource.ID}}{{end}}" method="post">
+				<div class="mb-3">
+					<label class="form-label" required>ZIP</label>
+					<input class="form-control" type="text" name="zip" {{if .Resource}}value="{{.Resource.ZIP}}" {{end}} required>
+				</div>
 
-	<div class="mb-3">
-		<label class="form-label">Country</label>
-		<input class="form-control" type="text" name="country" {{if .Resource}}value="{{.Resource.Country}}" {{end}}>
-	</div>
+				<div class="mb-3">
+					<label class="form-label" required>City</label>
+					<input class="form-control" type="text" name="city" {{if .Resource}}value="{{.Resource.City}}" {{end}} required>
+				</div>
 
-	<div class="mb-3">
-		<label class="form-label">Latitude</label>
-		<input class="form-control" type="text" name="latitude" placeholder="00.000000" {{if
-			.Resource}}value="{{.Resource.Latitude}}" {{end}}>
-	</div>
+				<div class="mb-3">
+					<label class="form-label" required>Street</label>
+					<input class="form-control" type="text" name="street" {{if .Resource}}value="{{.Resource.Street}}" {{end}}required>
+				</div>
 
-	<div class="mb-3">
-		<label class="form-label">Longitude</label>
-		<input class="form-control" type="text" name="longitude" placeholder="000.000000" {{if
-			.Resource}}value="{{.Resource.Longitude}}" {{end}}>
-	</div>
-</form>
+				<div class="mb-3">
+					<label class="form-label">Country</label>
+					<input class="form-control" type="text" name="country" {{if .Resource}}value="{{.Resource.Country}}" {{end}}>
+				</div>
 
-{{if .Resource}}
-<div class="card">
-	<div class="card-body">
-		<div id="map"></div>
+				<div class="mb-3">
+					<label class="form-label">Latitude</label>
+					<input class="form-control" type="text" name="latitude" placeholder="00.000000" {{if
+						.Resource}}value="{{.Resource.Latitude}}" {{end}}>
+				</div>
+
+				<div class="mb-3">
+					<label class="form-label">Longitude</label>
+					<input class="form-control" type="text" name="longitude" placeholder="000.000000" {{if .Resource}}value="{{.Resource.Longitude}}" {{end}}>
+				</div>
+			</form>
+
+		</div>
 	</div>
 </div>
 
+{{if .Resource}}
+<div class="col-12">
+	<div class="card">
+		<div class="card-table">
+			<div id="map"></div>
+		</div>
+	</div>
+</div>
+{{end}}
+
+{{if .Resource}}
 <style>
 	#map {
 		height: 25rem;
@@ -62,7 +74,5 @@
 
 	L.marker([lat, lon]).addTo(map);
 </script>
-
-
 {{end}}
 {{end}}

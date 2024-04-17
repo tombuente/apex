@@ -1,17 +1,25 @@
 {{define "plant-form"}}
-<form id="plant-form" action="/logistics/plants{{if .Resource}}/{{.Resource.ID}}{{end}}" method="post">
-	<div class="mb-3">
-		<label class="form-label" required>Name</label>
-		<input class="form-control" type="text" name="name" {{if .Resource}}value="{{.Resource.Name}}" {{end}} required>
-	</div>
 
-	<div class="mb-3">
-		<label class="form-label" required>Address</label>
-		<select class="form-select" name="address_id">
-			{{range .Addresses}}
-			<option value="{{.ID}}" {{if $.Resource}}{{if eq $.Resource.AddressID .ID}}selected{{end}}{{end}}>{{.Street}}, {{.City}} ({{.ZIP}}), {{.Country}}</option>
-			{{end}}
-		</select>
+<div class="card">
+	<div class="card-body">
+
+		<form id="plant-form" action="/logistics/plants{{if .Resource}}/{{.Resource.ID}}{{end}}" method="post">
+			<div class="mb-3">
+				<label class="form-label" required>Name</label>
+				<input class="form-control" type="text" name="name" {{if .Resource}}value="{{.Resource.Name}}" {{end}} required>
+			</div>
+
+			<div class="mb-3">
+				<label class="form-label" required>Address</label>
+				<select class="form-select" name="address_id">
+					{{range .Addresses}}
+					<option value="{{.ID}}" {{if $.Resource}}{{if eq $.Resource.AddressID .ID}}selected{{end}}{{end}}>{{.Street}}, {{.City}} ({{.ZIP}}), {{.Country}}</option>
+					{{end}}
+				</select>
+			</div>
+		</form>
+		
 	</div>
-</form>
+</div>
+
 {{end}}
