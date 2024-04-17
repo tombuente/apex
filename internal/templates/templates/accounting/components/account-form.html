@@ -1,10 +1,10 @@
 {{define "account-form"}}
 
 <form id="account-form" action="/accounting/accounts{{if .Resource}}/{{.Resource.ID}}{{end}}" method="post">
-    <div class="mb-3">
-        <label class="form-label" required>Description</label>
-        <input class="form-control" type="text" name="description" {{if .Resource}}value="{{.Resource.Description}}" {{end}} required>
-    </div>
+	<div class="mb-3">
+		<label class="form-label" required>Description</label>
+		<input class="form-control" type="text" name="description" {{if .Resource}}value="{{.Resource.Description}}"{{end}} required>
+	</div>
 </form>
 
 {{end}}

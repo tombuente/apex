@@ -1,131 +1,130 @@
 {{define "document-form"}}
 
 <form id="document-form" action="/accounting/documents{{if .Resource}}/{{.Resource.ID}}{{end}}" method="post">
-    <div class="row">
+	<div class="row">
 
-        <div class="col">
-            <div class="mb-3 me-2">
-                <label class="form-label" required>Description</label>
-                <input class="form-control" type="text" name="description" {{if
-                    .Resource}}value="{{.Resource.Description}}" {{end}} required>
-            </div>
+		<div class="col">
+			<div class="mb-3 me-2">
+				<label class="form-label" required>Description</label>
+				<input class="form-control" type="text" name="description" {{if
+					.Resource}}value="{{.Resource.Description}}" {{end}} required>
+			</div>
 
-            <div class="mb-3 me-2">
-                <label class="form-label" required>Date</label>
-                <input class="form-control" type="text" name="date" placeholder="YYYY-MM-DD" {{if
-                    .Resource}}value="{{.Resource.Date}}" {{end}} required>
-            </div>
+			<div class="mb-3 me-2">
+				<label class="form-label" required>Date</label>
+				<input class="form-control" type="text" name="date" placeholder="YYYY-MM-DD" {{if
+					.Resource}}value="{{.Resource.Date}}" {{end}} required>
+			</div>
 
-            <div class="mb-3 me-2">
-                <label class="form-label" required>Posting date</label>
-                <input class="form-control" type="text" name="posting_date" placeholder="YYYY-MM-DD" {{if
-                    .Resource}}value="{{.Resource.PostingDate}}" {{end}} required>
-            </div>
+			<div class="mb-3 me-2">
+				<label class="form-label" required>Posting date</label>
+				<input class="form-control" type="text" name="posting_date" placeholder="YYYY-MM-DD" {{if
+					.Resource}}value="{{.Resource.PostingDate}}" {{end}} required>
+			</div>
 
-            <div class="mb-3 me-2">
-                <label class="form-label" required>Reference</label>
-                <input class="form-control" type="text" name="reference" {{if .Resource}}value="{{.Resource.Reference}}"{{end}} required>
-            </div>
-        </div>
+			<div class="mb-3 me-2">
+				<label class="form-label" required>Reference</label>
+				<input class="form-control" type="text" name="reference" {{if .Resource}}value="{{.Resource.Reference}}"{{end}} required>
+			</div>
+		</div>
 
-        <div class="col">
-            <div class="mb-3 ms-2">
-                <label class="form-label" required>Currency</label>
-                <select class="form-select" name="currency_id">
-                    {{range .Currencies}}
-                    <option value="{{.ID}}">{{.Name}} ({{.ISO}})</option>
-                    {{end}}
-                </select>
-            </div>
+		<div class="col">
+			<div class="mb-3 ms-2">
+				<label class="form-label" required>Currency</label>
+				<select class="form-select" name="currency_id">
+					{{range .Currencies}}
+					<option value="{{.ID}}">{{.Name}} ({{.ISO}})</option>
+					{{end}}
+				</select>
+			</div>
 
-            <div class="mb-3 ms-2">
-                <div id="health-status">
-                    <div class="alert alert-warning" role="alert">
-                        <h4 class="alert-title">Verify positions before submitting</h4>
-                    </div>
-                </div>
-            </div>
+			<div class="mb-3 ms-2">
+				<div id="health-status">
+					<div class="alert alert-warning" role="alert">
+						<h4 class="alert-title">Verify positions before submitting</h4>
+					</div>
+				</div>
+			</div>
 
-            <div class="mb-3 ms-2">
-                <div class="row">
-                    <div class="col"></div>
-                    <div class="col-auto">
-                        <input class="btn btn-secondary" type="button" hx-post="/accounting/documents/verify" value="Check health" hx-target="#health-status">
-                    </div>
-                </div>
-            </div>
-        </div>
+			<div class="mb-3 ms-2">
+				<div class="row">
+					<div class="col"></div>
+					<div class="col-auto">
+						<input class="btn btn-secondary" type="button" hx-post="/accounting/documents/verify"
+							value="Check health" hx-target="#health-status">
+					</div>
+				</div>
+			</div>
+		</div>
 
-    </div>
+	</div>
 
-    <div class="row my-3">
-        <hr>
-    </div>
+	<div class="row my-3">
+		<hr>
+	</div>
 
-    <div class="table-responsive mb-3">
-        <table id="positions" class="table table-vcenter">
-            <thead>
-                <tr>
-                    <th>Description</th>
-                    <th>Account</th>
-                    <th>Type</th>
-                    <th>Amount</th>
-                    <th>...</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>
-                        <input class="form-control" type="text" name="position_description" required>
-                    </td>
+	<div class="table-responsive mb-3">
+		<table id="positions" class="table table-vcenter">
+			<thead>
+				<tr>
+					<th>Description</th>
+					<th>Account</th>
+					<th>Type</th>
+					<th>Amount</th>
+					<th>...</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>
+						<input class="form-control" type="text" name="position_description" required>
+					</td>
 
-                    <td>
-                        <select class="form-select" name="position_account_id">
-                            {{range .Accounts}}
-                            <option value="{{.ID}}">{{.Description}}</option>
-                            {{end}}
-                        </select>
-                    </td>
+					<td>
+						<select class="form-select" name="position_account_id">
+							{{range .Accounts}}
+							<option value="{{.ID}}">{{.Description}}</option>
+							{{end}}
+						</select>
+					</td>
 
-                    <td>
-                        <select class="form-select" name="position_type_id">
-                            {{range .PositionTypes}}
-                            <option value="{{.ID}}">{{.Description}}</option>
-                            {{end}}
-                        </select>
-                    </td>
+					<td>
+						<select class="form-select" name="position_type_id">
+							{{range .PositionTypes}}
+							<option value="{{.ID}}">{{.Description}}</option>
+							{{end}}
+						</select>
+					</td>
 
-                    <td>
-                        <input id="position_amount" class="form-control" type="text" name="position_amount" required>
-                    </td>
+					<td>
+						<input id="position_amount" class="form-control" type="text" name="position_amount" required>
+					</td>
 
-                    <td>
-                        <button class="btn" type="button" onclick="deletePositionsRow(this)">X</button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+					<td>
+						<button class="btn" type="button" onclick="deletePositionsRow(this)">X</button>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
 
-    <div class="row">
-        <div class="col"></div>
-        <div class="col-auto">
-            <button class="btn" type="button" onclick="addPosition()">Add Position</button>
-        </div>
-    </div>
-   
+	<div class="row">
+		<div class="col"></div>
+		<div class="col-auto">
+			<button class="btn" type="button" onclick="addPosition()">Add Position</button>
+		</div>
+	</div>
+
 </form>
 
 
 
 <script>
-    function addPosition() {
-        console.log("Test")
+	function addPosition() {
+		const table = document.getElementById("positions");
+		const row = table.insertRow(-1);
 
-        let table = document.getElementById("positions");
-        let row = table.insertRow(-1);
-
-        row.innerHTML = `
+		row.innerHTML = `
             <td>
                 <input class="form-control" type="text" name="position_description" required>
             </td>
@@ -154,17 +153,17 @@
                 <button class="btn" type="button" onclick="deletePositionsRow(this)">X</button>
             </td>
         `;
-    }
+	}
 
-    function deletePositionsRow(button) {
-        var parent = button.parentNode.parentNode;
-        parent.parentNode.removeChild(parent);
-    }
+	function deletePositionsRow(button) {
+		var parent = button.parentNode.parentNode;
+		parent.parentNode.removeChild(parent);
+	}
 
-    function health() {
-        var parent = button.parentNode.parentNode;
-        parent.parentNode.removeChild(parent);
-    }
+	function health() {
+		var parent = button.parentNode.parentNode;
+		parent.parentNode.removeChild(parent);
+	}
 </script>
 
 {{end}}
