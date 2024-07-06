@@ -62,7 +62,7 @@ func (account Account) GetID() string {
 }
 
 func (account Account) Redirect() string {
-	return "/accounting/accounts"
+	return "/accounting/accounts" + account.GetID()
 }
 
 func (document Document) GetID() string {
@@ -70,5 +70,5 @@ func (document Document) GetID() string {
 }
 
 func (document Document) Redirect() string {
-	return "/accounting/documents"
+	return "/accounting/documents" + document.GetID()
 }

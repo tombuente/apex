@@ -3,7 +3,6 @@ package xui
 import (
 	"context"
 	"errors"
-	"fmt"
 	"html/template"
 	"log/slog"
 	"net/http"
@@ -165,11 +164,11 @@ func Create[R Resource, P any](
 		item, err := createFunc(r.Context(), params)
 		if err != nil {
 			slog.Error("Unable to create entry in database", "error", err)
-			xerrors.RenderHTML(w, "generic", err)
+			http.Error(w, "unable to create resource", http.StatusInternalServerError)
 			return
 		}
 
-		http.Redirect(w, r, fmt.Sprintf("%v/%v", item.Redirect(), item.GetID()), http.StatusFound)
+		http.Redirect(w, r, item.Redirect(), http.StatusFound)
 	}
 }
 
@@ -184,24 +183,25 @@ func Update[R Resource, P any](
 
 		err = r.ParseForm()
 		if err != nil {
-			http.Error(w, "bad form", http.StatusBadRequest)
+			http.Error(w, "unable to parse form", http.StatusBadRequest)
 			return
 		}
 
 		var params P
 		err = Decoder.Decode(&params, r.PostForm)
 		if err != nil {
+			slog.Error("Unable to ", "error", err)
 			http.Error(w, "unable to decode form", http.StatusBadRequest)
 			return
 		}
 
-		updated, err := updateFunc(r.Context(), id, params)
+		item, err := updateFunc(r.Context(), id, params)
 		if err != nil {
-			slog.Error("Unable to update", "error", err)
-			xerrors.RenderHTML(w, "generic", err)
+			slog.Error("Unable to update resources", "error", err)
+			http.Error(w, "internal error", http.StatusInternalServerError)
 			return
 		}
 
-		http.Redirect(w, r, fmt.Sprintf("%v/%v", updated.Redirect(), updated.GetID()), http.StatusFound)
+		http.Redirect(w, r, item.Redirect(), http.StatusFound)
 	}
 }

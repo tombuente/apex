@@ -85,7 +85,7 @@ func (item Item) GetID() string {
 }
 
 func (item Item) Redirect() string {
-	return "/logistics/items"
+	return "/logistics/items/" + item.GetID()
 }
 
 func (itemCategory ItemCategory) GetID() string {
@@ -93,7 +93,7 @@ func (itemCategory ItemCategory) GetID() string {
 }
 
 func (itemCategory ItemCategory) Redirect() string {
-	return "/logistics/itemcategories"
+	return "/logistics/itemcategories/" + itemCategory.GetID()
 }
 
 func (address Address) GetID() string {
@@ -101,7 +101,7 @@ func (address Address) GetID() string {
 }
 
 func (address Address) Redirect() string {
-	return "/logistics/addresses"
+	return "/logistics/addresses/" + address.GetID()
 }
 
 func (plant Plant) GetID() string {
@@ -109,5 +109,5 @@ func (plant Plant) GetID() string {
 }
 
 func (plant Plant) Redirect() string {
-	return "/logistics/plants"
+	return "/logistics/plants/" + plant.GetID()
 }
