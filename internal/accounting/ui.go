@@ -18,7 +18,7 @@ type UI struct {
 	templates map[string]*template.Template
 }
 
-func NewUIRouter(service Service) (chi.Router, error) {
+func NewUIRouter(service Service) (*chi.Mux, error) {
 	ui := UI{
 		service:   service,
 		templates: make(map[string]*template.Template),
