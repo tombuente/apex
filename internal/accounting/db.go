@@ -18,7 +18,7 @@ type Database struct {
 	db *pgx.Conn
 }
 
-func NewDatabase(db *pgx.Conn) Database {
+func MakeDatabase(db *pgx.Conn) Database {
 	return Database{
 		db: db,
 	}

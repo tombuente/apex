@@ -17,6 +17,7 @@ import (
 )
 
 func main() {
+	// "postgres://username:password@host:port/database_name"
 	postgres, err := pgx.Connect(context.Background(), os.Getenv("DATABASE"))
 	if err != nil {
 		slog.Error("Unable to connect to Postgres:", "error", err)
@@ -30,8 +31,8 @@ func main() {
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.URLFormat)
 
-	logisticsDB := logistics.NewDatabase(postgres)
-	logisticsService := logistics.NewService(logisticsDB)
+	logisticsDB := logistics.MakeDatabase(postgres)
+	logisticsService := logistics.MakeService(logisticsDB)
 
 	logisticsUIRouter, err := logistics.NewUIRouter(logisticsService)
 	if err != nil {
@@ -41,8 +42,8 @@ func main() {
 
 	r.Mount("/logistics", logisticsUIRouter)
 
-	accountingQueries := accounting.NewDatabase(postgres)
-	accountingService := accounting.NewService(accountingQueries)
+	accountingQueries := accounting.MakeDatabase(postgres)
+	accountingService := accounting.MakeService(accountingQueries)
 	accountingUIRouter, err := accounting.NewUIRouter(accountingService)
 	if err != nil {
 		fmt.Println("Unable to create UI router:", err)

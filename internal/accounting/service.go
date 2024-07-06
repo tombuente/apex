@@ -4,13 +4,11 @@ import (
 	"context"
 )
 
-const name = "accounting"
-
 type Service struct {
 	db Database
 }
 
-func NewService(db Database) Service {
+func MakeService(db Database) Service {
 	return Service{
 		db: db,
 	}
@@ -45,5 +43,6 @@ func (s Service) documentPositionTypes(ctx context.Context) ([]DocumentPositionT
 }
 
 func (s Service) createDocument(ctx context.Context, params DocumentParams) ([]DocumentWithPositions, error) {
+	// TODO: Remove dummy
 	return []DocumentWithPositions{}, nil
 }

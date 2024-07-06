@@ -36,10 +36,10 @@ func NewUIRouter(service Service) (chi.Router, error) {
 
 	r.Route("/accounts", func(r chi.Router) {
 		r.Get("/{id}", xui.DetailView(ui.service.account, ui.templates["account-detail"]))
-		r.Post("/{id}", xui.Update("/accounting/accounts", ui.service.updateAccount))
+		r.Post("/{id}", xui.Update(ui.service.updateAccount))
 		r.Get("/", ui.accountListView)
 		r.Get("/new", xui.CreateView[Account](ui.templates["account-create"]))
-		r.Post("/", xui.Create("/accounting/accounts", ui.service.createAccount))
+		r.Post("/", xui.Create(ui.service.createAccount))
 	})
 
 	r.Route("/documents", func(r chi.Router) {
@@ -110,8 +110,9 @@ func (ui UI) vertifyDocumentViewHTMX(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ui.templates["document-health.htmx"].ExecuteTemplate(w, "health", nil)
-	if err != nil {
+	if err := ui.templates["document-health.htmx"].ExecuteTemplate(w, "health", nil); err != nil {
 		slog.Error("Unable to execute template", "error", err)
+		http.Error(w, "internal error", http.StatusInternalServerError)
+		return
 	}
 }

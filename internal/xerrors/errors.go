@@ -17,18 +17,18 @@ func Join(err1 error, err2 error) error {
 }
 
 func RenderHTML(w http.ResponseWriter, resource string, err error) {
-	code, message := ErrorInfo(err)
+	message, code := HttpInfo(err)
 
 	http.Error(w, fmt.Sprintf("%v: %v", resource, message), code)
 }
 
-func ErrorInfo(err error) (int, string) {
+func HttpInfo(err error) (string, int) {
 	switch {
 	case errors.Is(err, ErrNotFound):
-		return http.StatusNotFound, ErrNotFound.Error()
+		return ErrNotFound.Error(), http.StatusNotFound
 	case errors.Is(err, ErrBadRequest):
-		return http.StatusBadRequest, ErrBadRequest.Error()
+		return ErrBadRequest.Error(), http.StatusBadRequest
 	}
 
-	return http.StatusInternalServerError, ErrInternal.Error()
+	return ErrInternal.Error(), http.StatusInternalServerError
 }

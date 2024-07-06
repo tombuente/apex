@@ -4,13 +4,11 @@ import (
 	"context"
 )
 
-const name = "logistics"
-
 type Service struct {
 	db Database
 }
 
-func NewService(db Database) Service {
+func MakeService(db Database) Service {
 	return Service{
 		db: db,
 	}

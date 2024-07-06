@@ -14,10 +14,6 @@ type Item struct {
 	NetPrice   int64  `db:"net_price" json:"net_price"`
 }
 
-func (item Item) IDString() string {
-	return strconv.FormatInt(item.ID, 10)
-}
-
 type ItemParams struct {
 	Name       string `json:"name" schema:"name,required"`
 	SKU        string `json:"sku" schema:"sku,required"`
@@ -40,10 +36,6 @@ type ItemCategory struct {
 	Name string `db:"name"`
 }
 
-func (category ItemCategory) IDString() string {
-	return strconv.FormatInt(category.ID, 10)
-}
-
 type Address struct {
 	ID        int64   `db:"id" json:"id"`
 	ZIP       string  `db:"zip" json:"zip"`
@@ -52,10 +44,6 @@ type Address struct {
 	Country   string  `db:"country" json:"country"`
 	Latitude  float64 `db:"latitude" json:"latitude"`
 	Longitude float64 `db:"longitude" json:"longitude"`
-}
-
-func (address Address) IDString() string {
-	return strconv.FormatInt(address.ID, 10)
 }
 
 type AddressParams struct {
@@ -82,10 +70,6 @@ type Plant struct {
 	AddressID int64  `db:"address_id" json:"address_id"`
 }
 
-func (plant Plant) IDString() string {
-	return strconv.FormatInt(plant.ID, 10)
-}
-
 type PlantParams struct {
 	Name      string `schema:"name" json:"name"`
 	AddressID int64  `schema:"address_id, required" json:"address_id"`
@@ -94,4 +78,36 @@ type PlantParams struct {
 type PlantFilter struct {
 	name      sql.NullString
 	addressID sql.NullInt64
+}
+
+func (item Item) GetID() string {
+	return strconv.FormatInt(item.ID, 10)
+}
+
+func (item Item) Redirect() string {
+	return "/logistics/items"
+}
+
+func (itemCategory ItemCategory) GetID() string {
+	return strconv.FormatInt(itemCategory.ID, 10)
+}
+
+func (itemCategory ItemCategory) Redirect() string {
+	return "/logistics/itemcategories"
+}
+
+func (address Address) GetID() string {
+	return strconv.FormatInt(address.ID, 10)
+}
+
+func (address Address) Redirect() string {
+	return "/logistics/addresses"
+}
+
+func (plant Plant) GetID() string {
+	return strconv.FormatInt(plant.ID, 10)
+}
+
+func (plant Plant) Redirect() string {
+	return "/logistics/plants"
 }

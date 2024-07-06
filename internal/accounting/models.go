@@ -57,10 +57,18 @@ type DocumentWithPositions struct {
 	Positions []DocumentPosition `json:"positions"`
 }
 
-func (account Account) IDString() string {
+func (account Account) GetID() string {
 	return strconv.FormatInt(account.ID, 10)
 }
 
-func (document Document) IDString() string {
+func (account Account) Redirect() string {
+	return "/accounting/accounts"
+}
+
+func (document Document) GetID() string {
 	return strconv.FormatInt(document.ID, 10)
+}
+
+func (document Document) Redirect() string {
+	return "/accounting/documents"
 }

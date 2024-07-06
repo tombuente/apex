@@ -18,11 +18,16 @@ import (
 var Decoder = schema.NewDecoder()
 
 type Resource interface {
-	IDString() string
+	GetID() string
+	Redirect() string
 }
 
 type data[R Resource] struct {
 	Resource *R
+}
+
+type dataMany[R Resource] struct {
+	Resources *[]R
 }
 
 func newData[R Resource](ctx context.Context, resource *R) (data[R], error) {
@@ -35,38 +40,42 @@ func newData[R Resource](ctx context.Context, resource *R) (data[R], error) {
 
 func BasicView(template *template.Template) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		err := template.Execute(w, nil)
-		if err != nil {
+		if err := template.Execute(w, nil); err != nil {
+			slog.Error("Unable to render template", "error", err)
 			http.Error(w, "internal error", http.StatusInternalServerError)
+			return
 		}
 	}
 }
 
 func ListView[R Resource, F any](
-	filterFunc func(ctx context.Context, values url.Values) (F, error),
+	makeFilterFunc func(ctx context.Context, values url.Values) (F, error),
 	queryFunc func(ctx context.Context, filter F) ([]R, error),
 	template *template.Template) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		filter, err := filterFunc(r.Context(), r.URL.Query())
-
-		resources, err := queryFunc(r.Context(), filter)
-		if err != nil && !errors.Is(err, xerrors.ErrNotFound) {
-			slog.Error("Unable to query resources", "error", err)
-			xerrors.RenderHTML(w, "generic", err)
+		resourceFilter, err := makeFilterFunc(r.Context(), r.URL.Query())
+		if err != nil {
+			slog.Error("Unable to create filter with makeFilterFunc", "error", err)
+			http.Error(w, "internal error", http.StatusInternalServerError)
 			return
 		}
 
-		ctx := struct {
-			Resources []R
-		}{
-			Resources: resources,
+		resources, err := queryFunc(r.Context(), resourceFilter)
+		if err != nil && !errors.Is(err, xerrors.ErrNotFound) {
+			slog.Error("Unable to query resources", "error", err)
+			http.Error(w, "unable to query resources", http.StatusInternalServerError)
+			return
 		}
 
-		fmt.Println()
+		var data dataMany[R]
+		if !errors.Is(err, xerrors.ErrNotFound) {
+			data.Resources = &resources
+		}
 
-		template.Execute(w, ctx)
-		if err != nil {
+		if err := template.Execute(w, data); err != nil {
 			slog.Error("Unable to execute template", "error", err)
+			http.Error(w, "internal error", http.StatusInternalServerError)
+			return
 		}
 	}
 }
@@ -79,7 +88,7 @@ func DetailView[R Resource](
 
 func DetailViewWithData[R Resource, D any](
 	queryFunc func(ctx context.Context, id int64) (R, error),
-	dataFunc func(ctx context.Context, resource *R) (D, error),
+	makeDataFunc func(ctx context.Context, resource *R) (D, error),
 	template *template.Template) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
@@ -90,19 +99,24 @@ func DetailViewWithData[R Resource, D any](
 
 		resource, err := queryFunc(r.Context(), id)
 		if err != nil {
-			xerrors.RenderHTML(w, "generic", err)
+			slog.Error("Unable to query resource", "error", err)
+			msg, code := xerrors.HttpInfo(err)
+			http.Error(w, msg, code)
 			return
 		}
 
-		data, err := dataFunc(r.Context(), &resource)
+		data, err := makeDataFunc(r.Context(), &resource)
 		if err != nil {
-			xerrors.RenderHTML(w, "generic", err)
+			slog.Error("Unable to make data", "error", err)
+			msg, code := xerrors.HttpInfo(err)
+			http.Error(w, msg, code)
 			return
 		}
 
-		err = template.Execute(w, data)
-		if err != nil {
+		if err := template.Execute(w, data); err != nil {
+			slog.Error("Unable to execute template", "error", err)
 			http.Error(w, "internal error", http.StatusInternalServerError)
+			return
 		}
 	}
 }
@@ -112,25 +126,26 @@ func CreateView[R Resource](template *template.Template) func(w http.ResponseWri
 }
 
 func CreateViewWithData[R Resource, D any](
-	dataFunc func(ctx context.Context, resource *R) (D, error),
+	makeDataFunc func(ctx context.Context, resource *R) (D, error),
 	template *template.Template) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		data, err := dataFunc(r.Context(), nil)
+		data, err := makeDataFunc(r.Context(), nil)
 		if err != nil {
-			slog.Error("Unable to construct data object for create view", "error", err)
-			xerrors.RenderHTML(w, "generic", err)
+			slog.Error("Unable to make data", "error", err)
+			msg, err := xerrors.HttpInfo(err)
+			http.Error(w, msg, err)
 			return
 		}
 
-		err = template.Execute(w, data)
-		if err != nil {
+		if err := template.Execute(w, data); err != nil {
 			slog.Error("Unable to execute template", "error", err)
+			http.Error(w, "internal error", http.StatusInternalServerError)
+			return
 		}
 	}
 }
 
 func Create[R Resource, P any](
-	redirect string,
 	createFunc func(ctx context.Context, params P) (R, error)) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		err := r.ParseForm()
@@ -154,12 +169,11 @@ func Create[R Resource, P any](
 			return
 		}
 
-		http.Redirect(w, r, fmt.Sprintf("%v/%v", redirect, item.IDString()), http.StatusFound)
+		http.Redirect(w, r, fmt.Sprintf("%v/%v", item.Redirect(), item.GetID()), http.StatusFound)
 	}
 }
 
 func Update[R Resource, P any](
-	redirect string,
 	updateFunc func(ctx context.Context, id int64, params P) (R, error)) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
@@ -188,6 +202,6 @@ func Update[R Resource, P any](
 			return
 		}
 
-		http.Redirect(w, r, fmt.Sprintf("%v/%v", redirect, updated.IDString()), http.StatusFound)
+		http.Redirect(w, r, fmt.Sprintf("%v/%v", updated.Redirect(), updated.GetID()), http.StatusFound)
 	}
 }
