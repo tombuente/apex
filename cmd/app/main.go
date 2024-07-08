@@ -33,23 +33,20 @@ func main() {
 
 	logisticsDB := logistics.MakeDatabase(postgres)
 	logisticsService := logistics.MakeService(logisticsDB)
-
 	logisticsUIRouter, err := logistics.NewUIRouter(logisticsService)
 	if err != nil {
-		fmt.Println("Unable to create UI router:", err)
+		slog.Error("Unable to create logistics UI router", "error", err)
 		return
 	}
-
 	r.Mount("/logistics", logisticsUIRouter)
 
-	accountingQueries := accounting.MakeDatabase(postgres)
-	accountingService := accounting.MakeService(accountingQueries)
+	accountingDB := accounting.MakeDatabase(postgres)
+	accountingService := accounting.MakeService(accountingDB)
 	accountingUIRouter, err := accounting.NewUIRouter(accountingService)
 	if err != nil {
-		fmt.Println("Unable to create UI router:", err)
+		slog.Error("Unable to create accounting UI router", "error", err)
 		return
 	}
-
 	r.Mount("/accounting", accountingUIRouter)
 
 	workDir, _ := os.Getwd()

@@ -23,7 +23,6 @@ type ItemParams struct {
 }
 
 type ItemFilter struct {
-	id         sql.NullInt64
 	name       sql.NullString
 	sku        sql.NullString
 	categoryID sql.NullInt64

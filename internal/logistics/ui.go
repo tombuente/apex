@@ -29,33 +29,33 @@ func NewUIRouter(service Service) (*chi.Mux, error) {
 	var err error
 	ui.templates, err = templates.Load("logistics")
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("unable to load templates: %w", err)
 	}
 
 	r := chi.NewRouter()
 	r.Get("/", ui.indexView)
 
 	r.Route("/items", func(r chi.Router) {
-		r.Get("/{id}", xui.DetailViewWithData(ui.service.item, ui.makeItemData, ui.templates["item-detail"]))
-		r.Post("/{id}", xui.Update(ui.service.updateItem))
-		r.Get("/", xui.ListView(ui.makeItemFilter, ui.service.items, ui.templates["item-list"]))
 		r.Get("/new", xui.CreateViewWithData(ui.makeItemData, ui.templates["item-create"]))
+		r.Get("/{id}", xui.DetailViewWithData(ui.service.item, ui.makeItemData, ui.templates["item-detail"]))
+		r.Get("/", xui.ListView(ui.makeItemFilter, ui.service.items, ui.templates["item-list"]))
+		r.Post("/{id}", xui.Update(ui.service.updateItem))
 		r.Post("/", xui.Create(ui.service.createItem))
 	})
 
 	r.Route("/plants", func(r chi.Router) {
-		r.Get("/{id}", xui.DetailViewWithData(ui.service.plant, ui.makePlantData, ui.templates["plant-detail"]))
-		r.Post("/{id}", xui.Update(ui.service.updatePlant))
-		r.Get("/", xui.ListView(ui.makePlantFilter, ui.service.plants, ui.templates["plant-list"]))
 		r.Get("/new", xui.CreateViewWithData(ui.makePlantData, ui.templates["plant-create"]))
+		r.Get("/{id}", xui.DetailViewWithData(ui.service.plant, ui.makePlantData, ui.templates["plant-detail"]))
+		r.Get("/", xui.ListView(ui.makePlantFilter, ui.service.plants, ui.templates["plant-list"]))
+		r.Post("/{id}", xui.Update(ui.service.updatePlant))
 		r.Post("/", xui.Create(ui.service.createPlant))
 	})
 
 	r.Route("/addresses", func(r chi.Router) {
-		r.Get("/{id}", xui.DetailView(ui.service.address, ui.templates["address-detail"]))
-		r.Post("/{id}", xui.Update(ui.service.updateAddress))
-		r.Get("/", xui.ListView(ui.makeAddressFilter, ui.service.addresses, ui.templates["address-list"]))
 		r.Get("/new", xui.CreateView[Address](ui.templates["address-create"]))
+		r.Get("/{id}", xui.DetailView(ui.service.address, ui.templates["address-detail"]))
+		r.Get("/", xui.ListView(ui.makeAddressFilter, ui.service.addresses, ui.templates["address-list"]))
+		r.Post("/{id}", xui.Update(ui.service.updateAddress))
 		r.Post("/", xui.Create(ui.service.createAddress))
 	})
 
