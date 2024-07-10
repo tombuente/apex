@@ -10,6 +10,7 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/tombuente/apex/internal/flash"
 	"github.com/tombuente/apex/internal/templates"
 	"github.com/tombuente/apex/internal/xerrors"
 	"github.com/tombuente/apex/internal/xui"
@@ -18,6 +19,18 @@ import (
 type UI struct {
 	service   Service
 	templates map[string]*template.Template
+}
+
+type itemData struct {
+	Message    flash.Message
+	Resource   *Item
+	Categories []ItemCategory
+}
+
+type plantData struct {
+	Message   flash.Message
+	Resource  *Plant
+	Addresses []Address
 }
 
 func NewUIRouter(service Service) (*chi.Mux, error) {
@@ -69,18 +82,14 @@ func (ui UI) indexView(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-type itemData struct {
-	Resource   *Item
-	Categories []ItemCategory
-}
-
-func (ui UI) makeItemData(ctx context.Context, item *Item) (itemData, error) {
+func (ui UI) makeItemData(ctx context.Context, w http.ResponseWriter, r *http.Request, item *Item) (itemData, error) {
 	categories, err := ui.service.itemCategories(ctx)
 	if err != nil {
 		return itemData{}, err
 	}
 
 	return itemData{
+		Message:    flash.Get(w, r),
 		Resource:   item,
 		Categories: categories,
 	}, nil
@@ -147,18 +156,14 @@ func (ui UI) makeAddressFilter(ctx context.Context, values url.Values) (AddressF
 	return filter, nil
 }
 
-type plantData struct {
-	Resource  *Plant
-	Addresses []Address
-}
-
-func (ui UI) makePlantData(ctx context.Context, plant *Plant) (plantData, error) {
+func (ui UI) makePlantData(ctx context.Context, w http.ResponseWriter, r *http.Request, plant *Plant) (plantData, error) {
 	addresses, err := ui.service.addresses(ctx, AddressFilter{})
 	if err != nil {
 		return plantData{}, err
 	}
 
 	return plantData{
+		Message:   flash.Get(w, r),
 		Resource:  plant,
 		Addresses: addresses,
 	}, nil

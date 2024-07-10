@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/gorilla/schema"
+	"github.com/tombuente/apex/internal/flash"
 	"github.com/tombuente/apex/internal/xerrors"
 )
 
@@ -21,20 +22,28 @@ type Resource interface {
 	Redirect() string
 }
 
-type data[R Resource] struct {
+type dataOne[R Resource] struct {
+	Message  flash.Message
 	Resource *R
 }
 
 type dataMany[R Resource] struct {
-	Resources *[]R
+	Message   flash.Message
+	Resources []R
 }
 
-func newData[R Resource](ctx context.Context, resource *R) (data[R], error) {
-	data := data[R]{
+func newDataOne[R Resource](ctx context.Context, w http.ResponseWriter, r *http.Request, resource *R) (dataOne[R], error) {
+	return dataOne[R]{
+		Message:  flash.Get(w, r),
 		Resource: resource,
-	}
+	}, nil
+}
 
-	return data, nil
+func newDataMany[R Resource](ctx context.Context, w http.ResponseWriter, r *http.Request, resources []R) (dataMany[R], error) {
+	return dataMany[R]{
+		Message:   flash.Get(w, r),
+		Resources: resources,
+	}, nil
 }
 
 func BasicView(template *template.Template) func(w http.ResponseWriter, r *http.Request) {
@@ -66,9 +75,11 @@ func ListView[R Resource, F any](
 			return
 		}
 
-		var data dataMany[R]
-		if !errors.Is(err, xerrors.ErrNotFound) {
-			data.Resources = &resources
+		data, err := newDataMany(r.Context(), w, r, resources)
+		if err != nil {
+			slog.Error("Unable to create data", "error", err)
+			http.Error(w, "internal error", http.StatusInternalServerError)
+			return
 		}
 
 		if err := template.Execute(w, data); err != nil {
@@ -82,12 +93,12 @@ func ListView[R Resource, F any](
 func DetailView[R Resource](
 	queryFunc func(ctx context.Context, id int64) (R, error),
 	template *template.Template) func(w http.ResponseWriter, r *http.Request) {
-	return DetailViewWithData(queryFunc, newData, template)
+	return DetailViewWithData(queryFunc, newDataOne, template)
 }
 
 func DetailViewWithData[R Resource, D any](
 	queryFunc func(ctx context.Context, id int64) (R, error),
-	makeDataFunc func(ctx context.Context, resource *R) (D, error),
+	makeDataFunc func(ctx context.Context, w http.ResponseWriter, r *http.Request, resource *R) (D, error),
 	template *template.Template) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
@@ -104,7 +115,7 @@ func DetailViewWithData[R Resource, D any](
 			return
 		}
 
-		data, err := makeDataFunc(r.Context(), &resource)
+		data, err := makeDataFunc(r.Context(), w, r, &resource)
 		if err != nil {
 			slog.Error("Unable to make data", "error", err)
 			msg, code := xerrors.HttpInfo(err)
@@ -121,14 +132,14 @@ func DetailViewWithData[R Resource, D any](
 }
 
 func CreateView[R Resource](template *template.Template) func(w http.ResponseWriter, r *http.Request) {
-	return CreateViewWithData[R](newData, template)
+	return CreateViewWithData[R](newDataOne, template)
 }
 
 func CreateViewWithData[R Resource, D any](
-	makeDataFunc func(ctx context.Context, resource *R) (D, error),
+	makeDataFunc func(ctx context.Context, w http.ResponseWriter, r *http.Request, resource *R) (D, error),
 	template *template.Template) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		data, err := makeDataFunc(r.Context(), nil)
+		data, err := makeDataFunc(r.Context(), w, r, nil)
 		if err != nil {
 			slog.Error("Unable to make data", "error", err)
 			msg, err := xerrors.HttpInfo(err)
@@ -168,6 +179,7 @@ func Create[R Resource, P any](
 			return
 		}
 
+		flash.EntryCreated(w)
 		http.Redirect(w, r, item.Redirect(), http.StatusFound)
 	}
 }
@@ -202,6 +214,7 @@ func Update[R Resource, P any](
 			return
 		}
 
+		flash.EntryUpdated(w)
 		http.Redirect(w, r, item.Redirect(), http.StatusFound)
 	}
 }

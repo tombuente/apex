@@ -1,41 +1,41 @@
 {{define "item-form"}}
-
-<div class="card">
-	<div class="card-body">
-
-		<form id="form" action="/logistics/items{{if .Resource}}/{{.Resource.ID}}{{end}}" method="post">
-			<div class="mb-3">
-				<label class="form-label" required>Name</label>
-				<input class="form-control" type="text" name="name" {{if .Resource}}value="{{.Resource.Name}}" {{end}} required>
-			</div>
-
-			<div class="mb-3">
-				<label class="form-label" required>SKU</label>
-				<input class="form-control" type="text" name="sku" {{if .Resource}}value="{{.Resource.SKU}}" {{end}} required>
-			</div>
-
-			<div class="mb-3">
-				<label class="form-label" required>Category</label>
-				<select class="form-select" name="category_id">
-					{{range .Categories}}
-					<option value="{{.ID}}">{{.Name}}</option>
-					{{end}}
-				</select>
-			</div>
-
-			<div class="mb-3">
-				<label class="form-label">Gross Price</label>
-				<input class="form-control" type="number" name="gross_price" {{if .Resource}}value="{{.Resource.GrossPrice}}"
-					{{end}}>
-			</div>
-
-			<div class="mb-3">
-				<label class="form-label">Net Price</label>
-				<input class="form-control" type="number" name="net_price" {{if .Resource}}value="{{.Resource.NetPrice}}"{{end}}>
-			</div>
-		</form>
-		
+<div class="col-12">
+	<div class="card">
+		<div class="card-body">
+	
+			<form id="form" action="/logistics/items{{if .Resource}}/{{.Resource.ID}}{{end}}" method="post">
+				<div class="mb-3">
+					<label class="form-label" required>Name</label>
+					<input class="form-control" type="text" name="name" {{if .Resource}}value="{{.Resource.Name}}" {{end}} required>
+				</div>
+	
+				<div class="mb-3">
+					<label class="form-label" required>SKU</label>
+					<input class="form-control" type="text" name="sku" {{if .Resource}}value="{{.Resource.SKU}}" {{end}} required>
+				</div>
+	
+				<div class="mb-3">
+					<label class="form-label" required>Category</label>
+					<select class="form-select" name="category_id">
+						{{range .Categories}}
+						<option value="{{.ID}}">{{.Name}}</option>
+						{{end}}
+					</select>
+				</div>
+	
+				<div class="mb-3">
+					<label class="form-label">Gross Price</label>
+					<input class="form-control" type="number" name="gross_price" {{if .Resource}}value="{{.Resource.GrossPrice}}"
+						{{end}}>
+				</div>
+	
+				<div class="mb-3">
+					<label class="form-label">Net Price</label>
+					<input class="form-control" type="number" name="net_price" {{if .Resource}}value="{{.Resource.NetPrice}}"{{end}}>
+				</div>
+			</form>
+			
+		</div>
 	</div>
 </div>
-
 {{end}}

@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/tombuente/apex/internal/flash"
 	"github.com/tombuente/apex/internal/templates"
 	"github.com/tombuente/apex/internal/xerrors"
 	"github.com/tombuente/apex/internal/xui"
@@ -16,6 +17,15 @@ import (
 type UI struct {
 	service   Service
 	templates map[string]*template.Template
+}
+
+type documentData struct {
+	Message       flash.Message
+	Resource      *Document
+	Accounts      []Account
+	Currencies    []Currency
+	PositionTypes []DocumentPositionType
+	Positions     []DocumentPosition
 }
 
 func NewUIRouter(service Service) (*chi.Mux, error) {
@@ -70,15 +80,7 @@ func (ui UI) accountListView(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-type documentData struct {
-	Resource      *Document
-	Accounts      []Account
-	Currencies    []Currency
-	PositionTypes []DocumentPositionType
-	Positions     []DocumentPosition
-}
-
-func (ui UI) newDocumentData(ctx context.Context, document *Document) (documentData, error) {
+func (ui UI) newDocumentData(ctx context.Context, w http.ResponseWriter, r *http.Request, document *Document) (documentData, error) {
 	accounts, err := ui.service.accounts(ctx, AccountFilter{})
 	if err != nil {
 		return documentData{}, nil
@@ -95,6 +97,7 @@ func (ui UI) newDocumentData(ctx context.Context, document *Document) (documentD
 	}
 
 	return documentData{
+		Message:       flash.Get(w, r),
 		Resource:      document,
 		Accounts:      accounts,
 		Currencies:    currencies,

@@ -26,7 +26,7 @@
 <body>
 	<div class="page">
 
-		{{ template "sidebar-nav" }}
+		{{template "sidebar-nav"}}
 
 		<div class="page-wrapper">
 			<div class="container-xl">
@@ -35,24 +35,35 @@
 					<div class="row align-items-center">
 						<div class="col">
 							<div class="page-pretitle">
-								{{ block "pretitle" . }}{{end}}
+								{{block "pretitle" .}}{{end}}
 							</div>
 							<h2 class="page-title">
-								{{ block "title" . }}{{end}}
+								{{block "title" .}}{{end}}
 							</h2>
 						</div>
 						<div class="col-auto ms-auto">
-							{{ block "control" . }}{{end}}
+							{{block "control" .}}{{end}}
 						</div>
 					</div>
 				</div>
 
 				<div class="page-body">
 					<div class="row row-deck row-cards">
-						{{ block "content" .}}{{end}}
+						{{if ne .Message.Content ""}}
+						<div class="col-12">
+							<div class="alert
+							{{if eq .Message.Level "info"}}alert-info{{end}}
+							{{if eq .Message.Level "success"}}alert-success{{end}}
+							" role="alert">
+								<h4 class="alert-title">Info</h4>
+								<div class="text-secondary">{{.Message.Content}}</div>
+							</div>
+						</div>
+						{{end}}
+
+						{{block "content" .}}{{end}}
 					</div>
 				</div>
-
 			</div>
 		</div>
 	</div>
@@ -63,7 +74,7 @@
 	const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
 </script>
 
-{{ define "sidebar-nav" }}
+{{define "sidebar-nav"}}
 <aside class="navbar navbar-vertical navbar-expand-lg bg-white">
 	<div class="container-fluid">
 		<div style="margin: var(--tblr-content-padding) 0 0;">
@@ -171,4 +182,4 @@
 		</div>
 	</div>
 </aside>
-{{ end}}
+{{end}}
