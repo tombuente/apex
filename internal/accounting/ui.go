@@ -19,6 +19,11 @@ type UI struct {
 	templates map[string]*template.Template
 }
 
+type accountsData struct {
+	Message   flash.Message
+	Resources []Account
+}
+
 type documentData struct {
 	Message       flash.Message
 	Resource      *Document
@@ -45,7 +50,7 @@ func NewUIRouter(service Service) (*chi.Mux, error) {
 	r.Get("/", xui.BasicView(ui.templates["dashboard"]))
 
 	r.Route("/accounts", func(r chi.Router) {
-		r.Get("/{id}", xui.DetailView(ui.service.account, ui.templates["account-detail"]))
+		r.Get("/{id}", xui.Detail(ui.service.account, ui.templates["account-detail"]))
 		r.Post("/{id}", xui.Update(ui.service.updateAccount))
 		r.Get("/", ui.accountListView)
 		r.Get("/new", xui.CreateView[Account](ui.templates["account-create"]))
@@ -53,7 +58,7 @@ func NewUIRouter(service Service) (*chi.Mux, error) {
 	})
 
 	r.Route("/documents", func(r chi.Router) {
-		r.Get("/new", xui.CreateViewWithData(ui.newDocumentData, ui.templates["document-create"]))
+		r.Get("/new", xui.CreateViewWithData(ui.additionalDocumentData, ui.templates["document-create"]))
 		r.Post("/verify", ui.vertifyDocumentViewHTMX)
 	})
 
@@ -68,19 +73,18 @@ func (ui UI) accountListView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx := struct {
-		Accounts []Account
-	}{
-		Accounts: accounts,
+	data := accountsData{
+		Message:   flash.Get(w, r),
+		Resources: accounts,
 	}
 
-	err = ui.templates["account-list"].Execute(w, ctx)
+	err = ui.templates["account-list"].Execute(w, data)
 	if err != nil {
 		slog.Error("Unable to execute template", "error", err)
 	}
 }
 
-func (ui UI) newDocumentData(ctx context.Context, w http.ResponseWriter, r *http.Request, document *Document) (documentData, error) {
+func (ui UI) additionalDocumentData(ctx context.Context, w http.ResponseWriter, r *http.Request, document *Document) (documentData, error) {
 	accounts, err := ui.service.accounts(ctx, AccountFilter{})
 	if err != nil {
 		return documentData{}, nil

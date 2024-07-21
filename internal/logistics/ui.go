@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"html/template"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -49,16 +50,16 @@ func NewUIRouter(service Service) (*chi.Mux, error) {
 	r.Get("/", ui.indexView)
 
 	r.Route("/items", func(r chi.Router) {
-		r.Get("/new", xui.CreateViewWithData(ui.makeItemData, ui.templates["item-create"]))
-		r.Get("/{id}", xui.DetailViewWithData(ui.service.item, ui.makeItemData, ui.templates["item-detail"]))
+		r.Get("/new", xui.CreateViewWithData(ui.makeAdditionalItemData, ui.templates["item-create"]))
+		r.Get("/{id}", xui.DetailWithAdditionalData(ui.service.item, ui.makeAdditionalItemData, ui.templates["item-detail"]))
 		r.Get("/", xui.ListView(ui.makeItemFilter, ui.service.items, ui.templates["item-list"]))
 		r.Post("/{id}", xui.Update(ui.service.updateItem))
 		r.Post("/", xui.Create(ui.service.createItem))
 	})
 
 	r.Route("/plants", func(r chi.Router) {
-		r.Get("/new", xui.CreateViewWithData(ui.makePlantData, ui.templates["plant-create"]))
-		r.Get("/{id}", xui.DetailViewWithData(ui.service.plant, ui.makePlantData, ui.templates["plant-detail"]))
+		r.Get("/new", xui.CreateViewWithData(ui.makeAdditionalPlantData, ui.templates["plant-create"]))
+		r.Get("/{id}", xui.DetailWithAdditionalData(ui.service.plant, ui.makeAdditionalPlantData, ui.templates["plant-detail"]))
 		r.Get("/", xui.ListView(ui.makePlantFilter, ui.service.plants, ui.templates["plant-list"]))
 		r.Post("/{id}", xui.Update(ui.service.updatePlant))
 		r.Post("/", xui.Create(ui.service.createPlant))
@@ -66,7 +67,7 @@ func NewUIRouter(service Service) (*chi.Mux, error) {
 
 	r.Route("/addresses", func(r chi.Router) {
 		r.Get("/new", xui.CreateView[Address](ui.templates["address-create"]))
-		r.Get("/{id}", xui.DetailView(ui.service.address, ui.templates["address-detail"]))
+		r.Get("/{id}", xui.Detail(ui.service.address, ui.templates["address-detail"]))
 		r.Get("/", xui.ListView(ui.makeAddressFilter, ui.service.addresses, ui.templates["address-list"]))
 		r.Post("/{id}", xui.Update(ui.service.updateAddress))
 		r.Post("/", xui.Create(ui.service.createAddress))
@@ -76,13 +77,14 @@ func NewUIRouter(service Service) (*chi.Mux, error) {
 }
 
 func (ui UI) indexView(w http.ResponseWriter, r *http.Request) {
-	err := ui.templates["dashboard"].Execute(w, nil)
-	if err != nil {
-		fmt.Println(err)
+	if err := ui.templates["dashboard"].Execute(w, nil); err != nil {
+		slog.Error("Unable to render template", "error", err)
+		http.Error(w, "internal error", http.StatusInternalServerError)
+		return
 	}
 }
 
-func (ui UI) makeItemData(ctx context.Context, w http.ResponseWriter, r *http.Request, item *Item) (itemData, error) {
+func (ui UI) makeAdditionalItemData(ctx context.Context, w http.ResponseWriter, r *http.Request, item *Item) (itemData, error) {
 	categories, err := ui.service.itemCategories(ctx)
 	if err != nil {
 		return itemData{}, err
@@ -156,7 +158,7 @@ func (ui UI) makeAddressFilter(ctx context.Context, values url.Values) (AddressF
 	return filter, nil
 }
 
-func (ui UI) makePlantData(ctx context.Context, w http.ResponseWriter, r *http.Request, plant *Plant) (plantData, error) {
+func (ui UI) makeAdditionalPlantData(ctx context.Context, w http.ResponseWriter, r *http.Request, plant *Plant) (plantData, error) {
 	addresses, err := ui.service.addresses(ctx, AddressFilter{})
 	if err != nil {
 		return plantData{}, err
