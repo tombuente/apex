@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"html/template"
+	"io/fs"
 	"log/slog"
 	"net/http"
 	"net/url"
@@ -34,14 +35,14 @@ type plantData struct {
 	Addresses []Address
 }
 
-func NewUIRouter(service Service) (*chi.Mux, error) {
+func NewUIRouter(templateFS fs.FS, service Service) (*chi.Mux, error) {
 	ui := UI{
 		service:   service,
 		templates: make(map[string]*template.Template),
 	}
 
 	var err error
-	ui.templates, err = templates.Load("logistics")
+	ui.templates, err = templates.Load(templateFS, "logistics")
 	if err != nil {
 		return nil, fmt.Errorf("unable to load templates: %w", err)
 	}

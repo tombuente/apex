@@ -1,18 +1,15 @@
 package templates
 
 import (
-	"embed"
 	"fmt"
 	"html/template"
+	"io/fs"
 	"log/slog"
 	"strings"
 )
 
-//go:embed templates/*
-var fs embed.FS
-
-func Load(service string) (map[string]*template.Template, error) {
-	entries, err := fs.ReadDir(fmt.Sprintf("templates/%v/views", service))
+func Load(templateFS fs.FS, service string) (map[string]*template.Template, error) {
+	entries, err := fs.ReadDir(templateFS, fmt.Sprintf("%v/views", service))
 	if err != nil {
 		return nil, err
 	}
@@ -26,13 +23,13 @@ func Load(service string) (map[string]*template.Template, error) {
 		viewNames = append(viewNames, entry.Name())
 	}
 
-	layout := "templates/layout.html"
-	views := fmt.Sprintf("templates/%v/views", service)
-	components := fmt.Sprintf("templates/%v/components/*.html", service)
+	layout := "layout.html"
+	views := fmt.Sprintf("%v/views", service)
+	components := fmt.Sprintf("%v/components/*.html", service)
 
 	compiled := make(map[string]*template.Template)
 	for _, viewName := range viewNames {
-		compiled[viewName[:strings.LastIndex(viewName, ".")]], err = template.ParseFS(fs, layout, fmt.Sprintf("%v/%v", views, viewName), components)
+		compiled[viewName[:strings.LastIndex(viewName, ".")]], err = template.ParseFS(templateFS, layout, fmt.Sprintf("%v/%v", views, viewName), components)
 		if err != nil {
 			return nil, err
 		}

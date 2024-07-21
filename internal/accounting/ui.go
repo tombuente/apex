@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"html/template"
+	"io/fs"
 	"log/slog"
 	"net/http"
 
@@ -33,14 +34,14 @@ type documentData struct {
 	Positions     []DocumentPosition
 }
 
-func NewUIRouter(service Service) (*chi.Mux, error) {
+func NewUIRouter(templateFS fs.FS, service Service) (*chi.Mux, error) {
 	ui := UI{
 		service:   service,
 		templates: make(map[string]*template.Template),
 	}
 
 	var err error
-	ui.templates, err = templates.Load("accounting")
+	ui.templates, err = templates.Load(templateFS, "accounting")
 	if err != nil {
 		return nil, err
 	}
