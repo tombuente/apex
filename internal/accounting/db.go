@@ -24,45 +24,45 @@ func MakeDatabase(db *pgx.Conn) Database {
 	}
 }
 
-const accountQuery = `
+func (db Database) account(ctx context.Context, id int64) (Account, error) {
+	const query = `
 SELECT *
 FROM accounting.accounts
 WHERE id = $1
 `
 
-func (db Database) account(ctx context.Context, id int64) (Account, error) {
-	return database.One[Account](ctx, db.db, accountQuery, id)
+	return database.One[Account](ctx, db.db, query, id)
 }
 
-const accountsQuery = `
+func (db Database) accounts(ctx context.Context, filter AccountFilter) ([]Account, error) {
+	const query = `
 SELECT *
 FROM accounting.accounts
 WHERE (description LIKE $1 OR $1 IS NULL)
 `
 
-func (db Database) accounts(ctx context.Context, filter AccountFilter) ([]Account, error) {
-	return database.Many[Account](ctx, db.db, accountsQuery, filter.Description)
+	return database.Many[Account](ctx, db.db, query, filter.Description)
 }
 
-const createAccountQuery = `
+func (db Database) createAccount(ctx context.Context, params AccountParams) (Account, error) {
+	const query = `
 INSERT INTO accounting.accounts (description)
 VALUES ($1)
 RETURNING *
 `
 
-func (db Database) createAccount(ctx context.Context, params AccountParams) (Account, error) {
-	return database.One[Account](ctx, db.db, createAccountQuery, params.Description)
+	return database.One[Account](ctx, db.db, query, params.Description)
 }
 
-const updateAccountQuery = `
+func (db Database) updateAccount(ctx context.Context, id int64, params AccountParams) (Account, error) {
+	const query = `
 UPDATE accounting.accounts
 SET description = $2
 WHERE id = $1
 RETURNING *
 `
 
-func (db Database) updateAccount(ctx context.Context, id int64, params AccountParams) (Account, error) {
-	return database.One[Account](ctx, db.db, updateAccountQuery, id, params.Description)
+	return database.One[Account](ctx, db.db, query, id, params.Description)
 }
 
 // const deleteAccountQuery = `
@@ -76,20 +76,20 @@ func (db Database) updateAccount(ctx context.Context, id int64, params AccountPa
 // 	return database.Exec(ctx, db.db, deleteAccountQuery, id)
 // }
 
-const currenciesQuery = `
+func (db Database) currencies(ctx context.Context) ([]Currency, error) {
+	const query = `
 SELECT *
 FROM accounting.currencies
 `
 
-func (db Database) currencies(ctx context.Context) ([]Currency, error) {
-	return database.Many[Currency](ctx, db.db, currenciesQuery)
+	return database.Many[Currency](ctx, db.db, query)
 }
 
-const documentPositionTypesQuery = `
+func (db Database) documentPositionTypes(ctx context.Context) ([]DocumentPositionType, error) {
+	const query = `
 SELECT *
 FROM accounting.document_position_types
 `
 
-func (db Database) documentPositionTypes(ctx context.Context) ([]DocumentPositionType, error) {
-	return database.Many[DocumentPositionType](ctx, db.db, documentPositionTypesQuery)
+	return database.Many[DocumentPositionType](ctx, db.db, query)
 }
