@@ -15,11 +15,11 @@ type Item struct {
 }
 
 type ItemParams struct {
-	Name       string `json:"name" schema:"name,required"`
-	SKU        string `json:"sku" schema:"sku,required"`
-	CategoryID int64  `json:"category_id" schema:"category_id,required"`
-	GrossPrice int64  `json:"gross_price" schema:"gross_price"`
-	NetPrice   int64  `json:"net_price" schema:"net_price"`
+	Name       string `json:"name" form:"name"`
+	SKU        string `json:"sku" form:"sku"`
+	CategoryID int64  `json:"category_id" form:"category_id"`
+	GrossPrice int64  `json:"gross_price" form:"gross_price"`
+	NetPrice   int64  `json:"net_price" form:"net_price"`
 }
 
 type ItemFilter struct {
@@ -46,12 +46,12 @@ type Address struct {
 }
 
 type AddressParams struct {
-	ZIP       string  `schema:"zip,required" json:"zip"`
-	City      string  `schema:"city,required" json:"city"`
-	Street    string  `schema:"street,required" json:"street"`
-	Country   string  `schema:"country,required" json:"country"`
-	Latitude  float64 `schema:"latitude" json:"latitude"`
-	Longitude float64 `schema:"longitude" json:"longitude"`
+	ZIP       string  `form:"zip" json:"zip"`
+	City      string  `form:"city" json:"city"`
+	Street    string  `form:"street" json:"street"`
+	Country   string  `form:"country" json:"country"`
+	Latitude  float64 `form:"latitude" json:"latitude"`
+	Longitude float64 `form:"longitude" json:"longitude"`
 }
 
 type AddressFilter struct {
@@ -70,8 +70,8 @@ type Plant struct {
 }
 
 type PlantParams struct {
-	Name      string `schema:"name" json:"name"`
-	AddressID int64  `schema:"address_id, required" json:"address_id"`
+	Name      string `form:"name" json:"name"`
+	AddressID int64  `form:"address_id" json:"address_id"`
 }
 
 type PlantFilter struct {

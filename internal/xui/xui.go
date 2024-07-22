@@ -10,7 +10,7 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/gorilla/schema"
+	"github.com/go-playground/form/v4"
 	"github.com/tombuente/apex/internal/flash"
 	"github.com/tombuente/apex/internal/xerrors"
 )
@@ -48,7 +48,7 @@ type UpdateFunc[R Resource, P any] func(ctx context.Context, id int64, params P)
 // MakeAdditionalDataFunc makes a template data object, it should always have a pointer named Resource or Resources.
 type MakeAdditionalDataFunc[R Resource, D any] func(ctx context.Context, w http.ResponseWriter, r *http.Request, resource *R) (D, error)
 
-var Decoder = schema.NewDecoder()
+var Decoder = form.NewDecoder()
 
 // makeDataOne makes a new data object with a resource and flash messages. It should always be used to make sure flash messages are read.
 func makeDataOne[R Resource](ctx context.Context, w http.ResponseWriter, r *http.Request, resource *R) (dataOne[R], error) {

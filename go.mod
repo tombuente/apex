@@ -4,7 +4,7 @@ go 1.22.0
 
 require (
 	github.com/go-chi/chi/v5 v5.1.0
-	github.com/gorilla/schema v1.4.1
+	github.com/go-playground/form/v4 v4.2.1
 	github.com/jackc/pgx/v5 v5.6.0
 )
 

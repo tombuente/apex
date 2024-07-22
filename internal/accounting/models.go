@@ -11,7 +11,7 @@ type Account struct {
 }
 
 type AccountParams struct {
-	Description string `json:"description" schema:"description"`
+	Description string `json:"description" form:"description"`
 }
 
 type AccountFilter struct {
@@ -49,7 +49,7 @@ type DocumentPosition struct {
 
 type DocumentParams struct {
 	Document
-	Positions []DocumentPosition `json:"positions" schema:"-"`
+	Positions []DocumentPosition `json:"positions" form:"-"`
 }
 
 type DocumentWithPositions struct {
