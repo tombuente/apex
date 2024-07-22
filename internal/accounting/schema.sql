@@ -12,6 +12,11 @@ CREATE TABLE IF NOT EXISTS accounting.accounts(
 	description TEXT   NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS accounting.document_position_types(
+	id          SERIAL       PRIMARY KEY,
+	description VARCHAR(255) NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS accounting.documents(
 	id           SERIAL       PRIMARY KEY,
 	date         VARCHAR(255) NOT NULL,
@@ -19,11 +24,6 @@ CREATE TABLE IF NOT EXISTS accounting.documents(
 	reference    VARCHAR(255) NOT NULL,
 	description  TEXT         NOT NULL,
 	currency_id  INTEGER      NOT NULL REFERENCES accounting.currencies(id)
-);
-
-CREATE TABLE IF NOT EXISTS accounting.document_position_types(
-	id          SERIAL       PRIMARY KEY,
-	description VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS accounting.document_positions(
