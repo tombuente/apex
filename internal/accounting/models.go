@@ -29,7 +29,8 @@ type DocumentPositionType struct {
 	Description string `json:"description" db:"description"`
 }
 
-type Document struct {
+// Should only be embedded
+type DocumentHeader struct {
 	ID          int64  `json:"id" db:"id"`
 	Description string `json:"description" db:"description"`
 	Date        string `json:"date" db:"date"`
@@ -38,23 +39,24 @@ type Document struct {
 	CurrencyID  int64  `json:"currency_id" db:"currency_id"`
 }
 
+// Should only be embedded
 type DocumentPosition struct {
 	ID          int64  `json:"id" db:"id"`
 	DocumentID  int64  `json:"document_id" db:"document_id"`
 	Description string `json:"description" db:"description"`
 	AccountID   int64  `json:"account_id" db:"account_id"`
-	Type        int64  `json:"type" db:"type"`
+	TypeID      int64  `json:"type" db:"type_id"`
 	Amount      int64  `json:"amount" db:"amount"`
 }
 
-type DocumentParams struct {
-	Document
-	Positions []DocumentPosition `json:"positions" form:"-"`
+type Document struct {
+	DocumentHeader
+	Positions []DocumentPosition `json:"positions"`
 }
 
-type DocumentWithPositions struct {
-	Document
-	Positions []DocumentPosition `json:"positions"`
+type DocumentParams struct {
+	DocumentHeader
+	Positions []DocumentPosition `json:"positions" form:"-"`
 }
 
 func (account Account) GetID() string {

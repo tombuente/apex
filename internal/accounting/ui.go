@@ -59,6 +59,7 @@ func NewUIRouter(templateFS fs.FS, service Service) (*chi.Mux, error) {
 	})
 
 	r.Route("/documents", func(r chi.Router) {
+		r.Get("/{id}", xui.DetailWithAdditionalData(ui.service.document, ui.additionalDocumentData, ui.templates["document-detail"]))
 		r.Get("/new", xui.CreateViewWithData(ui.additionalDocumentData, ui.templates["document-create"]))
 		r.Post("/verify", ui.vertifyDocumentViewHTMX)
 	})
@@ -107,7 +108,6 @@ func (ui UI) additionalDocumentData(ctx context.Context, w http.ResponseWriter, 
 		Accounts:      accounts,
 		Currencies:    currencies,
 		PositionTypes: documentPositionTypes,
-		Positions:     nil,
 	}, nil
 }
 

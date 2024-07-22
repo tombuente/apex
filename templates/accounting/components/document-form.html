@@ -1,5 +1,5 @@
 {{define "document-form"}}
-<form id="document-form" class="row row-deck row-cards ms-0" action="/accounting/documents{{if .Resource}}/{{.Resource.ID}}{{end}}" method="post">
+<form id="document-form" class="row row-deck row-cards ms-0" method="post" {{if .Resource}}action="/accounting/documents"{{end}} >
 	<div class="col-12 px-0">
 		<div class="card ">
 			<div class="card-body">
@@ -8,50 +8,33 @@
 					<div class="col">
 						<div class="mb-3 me-2">
 							<label class="form-label" required>Description</label>
-							<input class="form-control" type="text" name="description" {{if.Resource}}value="{{.Resource.Description}}" {{end}} required>
+							<input class="form-control" type="text" name="description" required {{if.Resource}}value="{{.Resource.Description}}" disabled{{end}}>
 						</div>
 
 						<div class="mb-3 me-2">
 							<label class="form-label" required>Date</label>
-							<input class="form-control" type="text" name="date" placeholder="YYYY-MM-DD" {{if.Resource}}value="{{.Resource.Date}}" {{end}} required>
+							<input class="form-control" type="text" name="date" placeholder="YYYY-MM-DD" required {{if.Resource}}value="{{.Resource.Date}}" disabled{{end}}>
 						</div>
 
 						<div class="mb-3 me-2">
 							<label class="form-label" required>Posting date</label>
-							<input class="form-control" type="text" name="posting_date" placeholder="YYYY-MM-DD" {{if.Resource}}value="{{.Resource.PostingDate}}" {{end}} required>
+							<input class="form-control" type="text" name="posting_date" placeholder="YYYY-MM-DD" required {{if.Resource}}value="{{.Resource.PostingDate}}" disabled{{end}}>
 						</div>
 
 						<div class="mb-3 me-2">
 							<label class="form-label" required>Reference</label>
-							<input class="form-control" type="text" name="reference" {{if .Resource}}value="{{.Resource.Reference}}"{{end}} required>
+							<input class="form-control" type="text" name="reference" required {{if .Resource}}value="{{.Resource.Reference}}" disabled{{end}}>
 						</div>
 					</div>
 
 					<div class="col">
 						<div class="mb-3 ms-2">
 							<label class="form-label" required>Currency</label>
-							<select class="form-select" name="currency_id">
+							<select class="form-select" name="currency_id" {{if .Resource}}disabled{{end}}>
 								{{range .Currencies}}
 								<option value="{{.ID}}">{{.Name}} ({{.ISO}})</option>
 								{{end}}
 							</select>
-						</div>
-
-						<div class="mb-3 ms-2">
-							<div id="health-status">
-								<div class="alert alert-warning" role="alert">
-									<h4 class="alert-title">Verify positions before submitting</h4>
-								</div>
-							</div>
-						</div>
-
-						<div class="mb-3 ms-2">
-							<div class="row">
-								<div class="col"></div>
-								<div class="col-auto">
-									<input class="btn btn-secondary" type="button" hx-post="/accounting/documents/verify" value="Check health" hx-target="#health-status">
-								</div>
-							</div>
 						</div>
 					</div>
 				</div>
@@ -75,50 +58,29 @@
 								<th>Account</th>
 								<th>Type</th>
 								<th>Amount</th>
-								<th>...</th>
+								{{if not .Resource}}<th>...</th>{{end}}
 							</tr>
 						</thead>
 						<tbody>
-							<tr>
-								<td>
-									<input class="form-control" type="text" name="position_description" required>
-								</td>
-
-								<td>
-									<select class="form-select" name="position_account_id">
-										{{range .Accounts}}
-										<option value="{{.ID}}">{{.Description}}</option>
-										{{end}}
-									</select>
-								</td>
-
-								<td>
-									<select class="form-select" name="position_type_id">
-										{{range .PositionTypes}}
-										<option value="{{.ID}}">{{.Description}}</option>
-										{{end}}
-									</select>
-								</td>
-
-								<td>
-									<input id="position_amount" class="form-control" type="text" name="position_amount" required>
-								</td>
-
-								<td>
-									<button class="btn" type="button" onclick="deletePositionsRow(this)">X</button>
-								</td>
-							</tr>
+							{{if .Resource}}
+							{{range .Resource.Positions}}
+							{{template "document-position-row" dict "Position" . "Accounts" $.Accounts "PositionTypes" $.PositionTypes}}
+							{{end}}
+							{{else}}
+							{{template "document-position-row" dict "Position" false "Accounts" $.Accounts "PositionTypes" $.PositionTypes}}
+							{{end}}
 						</tbody>
 					</table>
 				</div>
 
+				{{if not .Resource}}
 				<div class="row">
 					<div class="col"></div>
 					<div class="col-auto">
 						<button class="btn" type="button" onclick="addPosition()">Add position</button>
 					</div>
 				</div>
-		
+				{{end}}
 			</div>
 		</div>
 	</div>
@@ -129,35 +91,7 @@
 		const table = document.getElementById("positions");
 		const row = table.insertRow(-1);
 
-		row.innerHTML = `
-            <td>
-                <input class="form-control" type="text" name="position_description" required>
-            </td>
-
-            <td>
-                <select class="form-select" name="position_account_id">
-                    {{range .Accounts}}
-                    <option value="{{.ID}}">{{.Description}}</option>
-                    {{end}}
-                </select>
-            </td>
-
-            <td>
-                <select class="form-select" name="position_type_id">
-                    {{range .PositionTypes}}
-                    <option value="{{.ID}}">{{.Description}}</option>
-                    {{end}}
-                </select>
-            </td>
-
-            <td>
-                <input class="form-control" type="text" name="position_amount" required>
-            </td>
-
-            <td>
-                <button class="btn" type="button" onclick="deletePositionsRow(this)">X</button>
-            </td>
-        `;
+		row.innerHTML = `{{template "document-position-row" dict "Position" false "Accounts" $.Accounts "PositionTypes" $.PositionTypes}}`;
 	}
 
 	function deletePositionsRow(button) {
@@ -170,4 +104,38 @@
 		parent.parentNode.removeChild(parent);
 	}
 </script>
+{{end}}
+
+{{define "document-position-row"}}
+<tr>
+	<td>
+		<input class="form-control" type="text" name="position_description" required {{if .Position}}value="{{.Position.Description}}" disabled{{end}}>
+	</td>
+
+	<td>
+		<select class="form-select" name="position_account_id">
+			{{range .Accounts}}
+			<option value="{{.ID}}" {{if $.Position}}{{if eq $.Position.AccountID .ID}}selected {{end}}disabled{{end}}>{{.Description}}</option>
+			{{end}}
+		</select>
+	</td>
+
+	<td>
+		<select class="form-select" name="position_type_id">
+			{{range .PositionTypes}}
+			<option value="{{.ID}}" {{if $.Position}}{{if eq $.Position.TypeID .ID}}selected {{end}}disabled{{end}}>{{.Description}}</option>
+			{{end}}
+		</select>
+	</td>
+
+	<td>
+		<input id="position_amount" class="form-control" type="text" name="position_amount" required {{if .Position}}value="{{.Position.Amount}}" disabled{{end}}>
+	</td>
+
+	{{if not .Position}}
+	<td>
+		<button class="btn" type="button" onclick="deletePositionsRow(this)">X</button>
+	</td>
+	{{end}}
+</tr>
 {{end}}

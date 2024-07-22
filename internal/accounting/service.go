@@ -30,10 +30,6 @@ func (s Service) updateAccount(ctx context.Context, id int64, params AccountPara
 	return s.db.updateAccount(ctx, id, params)
 }
 
-// func (s Service) deleteAccount(ctx context.Context, id int64) error {
-// 	return s.db.deleteAccount(ctx, id)
-// }
-
 func (s Service) currencies(ctx context.Context) ([]Currency, error) {
 	return s.db.currencies(ctx)
 }
@@ -42,7 +38,11 @@ func (s Service) documentPositionTypes(ctx context.Context) ([]DocumentPositionT
 	return s.db.documentPositionTypes(ctx)
 }
 
-func (s Service) createDocument(ctx context.Context, params DocumentParams) ([]DocumentWithPositions, error) {
+func (s Service) document(ctx context.Context, id int64) (Document, error) {
+	return s.db.document(ctx, id)
+}
+
+func (s Service) createDocument(ctx context.Context, params DocumentParams) ([]Document, error) {
 	// TODO: Remove dummy
-	return []DocumentWithPositions{}, nil
+	return []Document{}, nil
 }

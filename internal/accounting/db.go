@@ -65,17 +65,6 @@ RETURNING *
 	return database.One[Account](ctx, db.db, query, id, params.Description)
 }
 
-// const deleteAccountQuery = `
-// UPDATE accounting.accounts
-// SET description = $2
-// WHERE id = $1
-// RETURNING *
-// `
-
-// func (db Database) deleteAccount(ctx context.Context, id int64) error {
-// 	return database.Exec(ctx, db.db, deleteAccountQuery, id)
-// }
-
 func (db Database) currencies(ctx context.Context) ([]Currency, error) {
 	const query = `
 SELECT *
@@ -92,4 +81,30 @@ FROM accounting.document_position_types
 `
 
 	return database.Many[DocumentPositionType](ctx, db.db, query)
+}
+
+func (db Database) document(ctx context.Context, id int64) (Document, error) {
+	const headerQuery = `
+SELECT *
+FROM accounting.documents
+WHERE id = $1
+`
+
+	header, err := database.One[DocumentHeader](ctx, db.db, headerQuery, id)
+	if err != nil {
+		return Document{}, nil
+	}
+
+	const positionsQuery = `
+SELECT *
+FROM accounting.document_positions
+WHERE document_id = $1
+`
+
+	positions, err := database.Many[DocumentPosition](ctx, db.db, positionsQuery, id)
+	if err != nil {
+		return Document{}, nil
+	}
+
+	return Document{DocumentHeader: header, Positions: positions}, nil
 }
