@@ -9,10 +9,9 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/jackc/pgx/v5"
+	"github.com/tombuente/apex"
 	"github.com/tombuente/apex/internal/accounting"
 	"github.com/tombuente/apex/internal/logistics"
-	"github.com/tombuente/apex/static"
-	"github.com/tombuente/apex/templates"
 )
 
 func main() {
@@ -32,7 +31,7 @@ func main() {
 
 	logisticsDB := logistics.MakeDatabase(postgres)
 	logisticsService := logistics.MakeService(logisticsDB)
-	logisticsUIRouter, err := logistics.NewUIRouter(templates.FS, logisticsService)
+	logisticsUIRouter, err := logistics.NewUIRouter(apex.TemplatesFS, logisticsService)
 	if err != nil {
 		slog.Error("Unable to create logistics UI router", "error", err)
 		return
@@ -41,15 +40,15 @@ func main() {
 
 	accountingDB := accounting.MakeDatabase(postgres)
 	accountingService := accounting.MakeService(accountingDB)
-	accountingUIRouter, err := accounting.NewUIRouter(templates.FS, accountingService)
+	accountingUIRouter, err := accounting.NewUIRouter(apex.TemplatesFS, accountingService)
 	if err != nil {
 		slog.Error("Unable to create accounting UI router", "error", err)
 		return
 	}
 	r.Mount("/accounting", accountingUIRouter)
 
-	staticHandler := http.FileServer(http.FS(static.FS))
-	r.Mount("/static", staticHandler)
+	staticHandler := http.FileServer(http.FS(apex.StaticFS))
+	r.Handle("/static/*", staticHandler)
 
 	slog.Info("Running...")
 	http.ListenAndServe(":8080", r)

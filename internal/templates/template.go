@@ -9,7 +9,7 @@ import (
 )
 
 func Load(templateFS fs.FS, service string) (map[string]*template.Template, error) {
-	entries, err := fs.ReadDir(templateFS, fmt.Sprintf("%v/views", service))
+	entries, err := fs.ReadDir(templateFS, fmt.Sprintf("templates/%v/views", service))
 	if err != nil {
 		return nil, err
 	}
@@ -23,9 +23,9 @@ func Load(templateFS fs.FS, service string) (map[string]*template.Template, erro
 		viewNames = append(viewNames, entry.Name())
 	}
 
-	layout := "layout.html"
-	views := fmt.Sprintf("%v/views", service)
-	components := fmt.Sprintf("%v/components/*.html", service)
+	layout := "templates/layout.html"
+	views := fmt.Sprintf("templates/%v/views", service)
+	components := fmt.Sprintf("templates/%v/components/*.html", service)
 
 	compiled := make(map[string]*template.Template)
 	for _, viewName := range viewNames {
