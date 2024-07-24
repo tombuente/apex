@@ -1,5 +1,5 @@
 {{define "document-form"}}
-<form id="document-form" class="row row-deck row-cards ms-0" method="post" {{if .Resource}}action="/accounting/documents"{{end}} >
+<form id="document-form" class="row row-deck row-cards ms-0" method="post" {{if not .Resource}}action="/accounting/documents"{{end}}>
 	<div class="col-12 px-0">
 		<div class="card ">
 			<div class="card-body">
@@ -67,7 +67,7 @@
 							{{template "document-position-row" dict "Position" . "Accounts" $.Accounts "PositionTypes" $.PositionTypes}}
 							{{end}}
 							{{else}}
-							{{template "document-position-row" dict "Position" false "Accounts" $.Accounts "PositionTypes" $.PositionTypes}}
+							{{template "document-position-row" dict "Accounts" $.Accounts "PositionTypes" $.PositionTypes}}
 							{{end}}
 						</tbody>
 					</table>
@@ -91,7 +91,7 @@
 		const table = document.getElementById("positions");
 		const row = table.insertRow(-1);
 
-		row.innerHTML = `{{template "document-position-row" dict "Position" false "Accounts" $.Accounts "PositionTypes" $.PositionTypes}}`;
+		row.innerHTML = `{{template "document-position-row" dict "Accounts" $.Accounts "PositionTypes" $.PositionTypes}}`;;
 	}
 
 	function deletePositionsRow(button) {
@@ -109,11 +109,11 @@
 {{define "document-position-row"}}
 <tr>
 	<td>
-		<input class="form-control" type="text" name="position_description" required {{if .Position}}value="{{.Position.Description}}" disabled{{end}}>
+		<input class="form-control" type="text" name="positions[].description" required {{if .Position}}value="{{.Position.Description}}" disabled{{end}}>
 	</td>
 
 	<td>
-		<select class="form-select" name="position_account_id">
+		<select class="form-select" name="positions[].account_id">
 			{{range .Accounts}}
 			<option value="{{.ID}}" {{if $.Position}}{{if eq $.Position.AccountID .ID}}selected {{end}}disabled{{end}}>{{.Description}}</option>
 			{{end}}
@@ -121,7 +121,7 @@
 	</td>
 
 	<td>
-		<select class="form-select" name="position_type_id">
+		<select class="form-select" name="positions[].type_id">
 			{{range .PositionTypes}}
 			<option value="{{.ID}}" {{if $.Position}}{{if eq $.Position.TypeID .ID}}selected {{end}}disabled{{end}}>{{.Description}}</option>
 			{{end}}
@@ -129,7 +129,7 @@
 	</td>
 
 	<td>
-		<input id="position_amount" class="form-control" type="text" name="position_amount" required {{if .Position}}value="{{.Position.Amount}}" disabled{{end}}>
+		<input id="position_amount" class="form-control" type="text" name="positions[].amount" required {{if .Position}}value="{{.Position.Amount}}" disabled{{end}}>
 	</td>
 
 	{{if not .Position}}

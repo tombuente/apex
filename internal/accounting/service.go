@@ -42,7 +42,10 @@ func (s Service) document(ctx context.Context, id int64) (Document, error) {
 	return s.db.document(ctx, id)
 }
 
-func (s Service) createDocument(ctx context.Context, params DocumentParams) ([]Document, error) {
-	// TODO: Remove dummy
-	return []Document{}, nil
+func (s Service) documents(ctx context.Context, filter DocumentFilter) ([]Document, error) {
+	return s.db.documents(ctx, filter)
+}
+
+func (s Service) createDocument(ctx context.Context, params DocumentParams) (Document, error) {
+	return s.db.createDocument(ctx, params)
 }

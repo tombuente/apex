@@ -48,6 +48,9 @@ type UpdateFunc[R Resource, P any] func(ctx context.Context, id int64, params P)
 // MakeAdditionalDataFunc makes a template data object, it should always have a pointer named Resource or Resources.
 type MakeAdditionalDataFunc[R Resource, D any] func(ctx context.Context, w http.ResponseWriter, r *http.Request, resource *R) (D, error)
 
+// ParseFormFunc tries to parse values and create a Paramter struct P
+type ParseFormFunc[P any] func(values url.Values) (P, error)
+
 var Decoder = form.NewDecoder()
 
 // makeDataOne makes a new data object with a resource and flash messages. It should always be used to make sure flash messages are read.
@@ -210,6 +213,33 @@ func Create[R Resource, P any](createFunc CreateFunc[R, P]) http.HandlerFunc {
 
 		var params P
 		err = Decoder.Decode(&params, r.PostForm)
+		if err != nil {
+			slog.Error("Unable to decode form", "error", err)
+			http.Error(w, "unable to decode form", http.StatusBadRequest)
+			return
+		}
+
+		item, err := createFunc(r.Context(), params)
+		if err != nil {
+			slog.Error("Unable to create entry in database", "error", err)
+			http.Error(w, "unable to create resource", http.StatusInternalServerError)
+			return
+		}
+
+		flash.EntryCreated(w)
+		http.Redirect(w, r, item.Redirect(), http.StatusFound)
+	}
+}
+
+func CreateWithFormParser[R Resource, P any](parseFormFunc ParseFormFunc[P], createFunc CreateFunc[R, P]) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		err := r.ParseForm()
+		if err != nil {
+			http.Error(w, "bad request", http.StatusInternalServerError)
+			return
+		}
+
+		params, err := parseFormFunc(r.PostForm)
 		if err != nil {
 			slog.Error("Unable to decode form", "error", err)
 			http.Error(w, "unable to decode form", http.StatusBadRequest)

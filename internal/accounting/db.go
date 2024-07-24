@@ -3,9 +3,11 @@ package accounting
 import (
 	"context"
 	_ "embed"
+	"errors"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/tombuente/apex/internal/database"
+	"github.com/tombuente/apex/internal/xerrors"
 )
 
 //go:embed schema.sql
@@ -92,7 +94,7 @@ WHERE id = $1
 
 	header, err := database.One[DocumentHeader](ctx, db.db, headerQuery, id)
 	if err != nil {
-		return Document{}, nil
+		return Document{}, err
 	}
 
 	const positionsQuery = `
@@ -102,9 +104,50 @@ WHERE document_id = $1
 `
 
 	positions, err := database.Many[DocumentPosition](ctx, db.db, positionsQuery, id)
-	if err != nil {
-		return Document{}, nil
+	if err != nil && !errors.Is(err, xerrors.ErrNotFound) {
+		return Document{}, err
 	}
 
 	return Document{DocumentHeader: header, Positions: positions}, nil
+}
+
+func (db Database) documents(ctx context.Context, _ DocumentFilter) ([]Document, error) {
+	const query = `
+SELECT *
+FROM accounting.documents
+`
+
+	return database.Many[Document](ctx, db.db, query)
+}
+
+func (db Database) createDocument(ctx context.Context, params DocumentParams) (Document, error) {
+	// TODO: use transaction to make sure documents are not created without positions and vise versa
+
+	const documentHeaderQuery = `
+INSERT INTO accounting.documents (date, posting_date, reference, description, currency_id)
+VALUES ($1, $2, $3, $4, $5)
+RETURNING *
+`
+	documentHeader, err := database.One[DocumentHeader](ctx, db.db, documentHeaderQuery, params.Date, params.PostingDate, params.Reference, params.Description, params.CurrencyID)
+	if err != nil {
+		return Document{}, err
+	}
+
+	const documentPositionsQuery = `
+INSERT INTO accounting.document_positions (document_id, account_id, description, type_id, amount)
+VALUES ($1, $2, $3, $4, $5)
+RETURNING *
+`
+	var documentPositions []DocumentPosition
+
+	for _, posParams := range params.Positions {
+		documentPosition, err := database.One[DocumentPosition](ctx, db.db, documentPositionsQuery, documentHeader.ID, posParams.AccountID, posParams.Description, posParams.TypeID, posParams.Amount)
+		if err != nil {
+			return Document{}, err
+		}
+
+		documentPositions = append(documentPositions, documentPosition)
+	}
+
+	return Document{DocumentHeader: documentHeader, Positions: documentPositions}, nil
 }

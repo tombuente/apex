@@ -29,6 +29,11 @@ type DocumentPositionType struct {
 	Description string `json:"description" db:"description"`
 }
 
+type Document struct {
+	DocumentHeader
+	Positions []DocumentPosition `json:"positions"`
+}
+
 // Should only be embedded
 type DocumentHeader struct {
 	ID          int64  `json:"id" db:"id"`
@@ -49,14 +54,27 @@ type DocumentPosition struct {
 	Amount      int64  `json:"amount" db:"amount"`
 }
 
-type Document struct {
-	DocumentHeader
-	Positions []DocumentPosition `json:"positions"`
+type DocumentParams struct {
+	DocumentHeaderParams
+	Positions []DocumentPositionParams
 }
 
-type DocumentParams struct {
-	DocumentHeader
-	Positions []DocumentPosition `json:"positions" form:"-"`
+type DocumentPositionParams struct {
+	Description string
+	AccountID   int64
+	TypeID      int64
+	Amount      int64
+}
+
+type DocumentHeaderParams struct {
+	Description string
+	Date        string
+	PostingDate string
+	Reference   string
+	CurrencyID  int64
+}
+
+type DocumentFilter struct {
 }
 
 func (account Account) GetID() string {
